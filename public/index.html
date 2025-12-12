@@ -1,61 +1,67 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InfraMinds Dashboard - MINDY & INFRON</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --mindy-primary: #4da6ff;
             --mindy-secondary: #66b3ff;
             --mindy-glow: rgba(77, 166, 255, 0.3);
-            
+
             --infron-primary: #ff8c42;
             --infron-secondary: #ffaa66;
             --infron-glow: rgba(255, 140, 66, 0.3);
-            
+
             --green: #00e6a0;
             --yellow: #ffd54f;
             --red: #ff6b6b;
-            
+
             --bg: #0a0b10;
-            --card: rgba(255,255,255,0.03);
-            --border: rgba(255,255,255,0.06);
+            --card: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.06);
         }
-        
+
         body {
             min-height: 100vh;
             background: var(--bg);
             font-family: 'Outfit', sans-serif;
             color: #fff;
         }
-        
+
         .bg-effects {
             position: fixed;
             inset: 0;
-            background: 
+            background:
                 radial-gradient(ellipse 60% 40% at 20% 20%, var(--mindy-glow), transparent),
                 radial-gradient(ellipse 60% 40% at 80% 80%, var(--infron-glow), transparent);
             pointer-events: none;
             opacity: 0.5;
         }
-        
+
         .container {
             position: relative;
             max-width: 1600px;
             margin: 0 auto;
             padding: 30px 20px;
         }
-        
+
         /* Header */
         header {
             text-align: center;
             margin-bottom: 40px;
         }
-        
+
         .logo {
             font-size: 2.5rem;
             font-weight: 800;
@@ -64,7 +70,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .week-selector {
             display: inline-flex;
             align-items: center;
@@ -75,7 +81,7 @@
             border-radius: 12px;
             border: 1px solid var(--border);
         }
-        
+
         .week-selector select {
             background: transparent;
             border: none;
@@ -85,11 +91,11 @@
             cursor: pointer;
             padding: 4px 8px;
         }
-        
+
         .week-selector select option {
             background: #1a1b20;
         }
-        
+
         /* Robots Grid */
         .robots-grid {
             display: grid;
@@ -97,11 +103,13 @@
             gap: 30px;
             margin-bottom: 30px;
         }
-        
+
         @media (max-width: 1000px) {
-            .robots-grid { grid-template-columns: 1fr; }
+            .robots-grid {
+                grid-template-columns: 1fr;
+            }
         }
-        
+
         .robot-card {
             background: var(--card);
             border-radius: 20px;
@@ -110,74 +118,84 @@
             position: relative;
             overflow: hidden;
         }
-        
-        .robot-card.mindy { border-top: 3px solid var(--mindy-primary); }
-        .robot-card.infron { border-top: 3px solid var(--infron-primary); }
-        
+
+        .robot-card.mindy {
+            border-top: 3px solid var(--mindy-primary);
+        }
+
+        .robot-card.infron {
+            border-top: 3px solid var(--infron-primary);
+        }
+
         .robot-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 20px;
         }
-        
+
         .robot-title {
             font-size: 1.8rem;
             font-weight: 700;
         }
-        
-        .robot-title.mindy { color: var(--mindy-primary); }
-        .robot-title.infron { color: var(--infron-primary); }
-        
+
+        .robot-title.mindy {
+            color: var(--mindy-primary);
+        }
+
+        .robot-title.infron {
+            color: var(--infron-primary);
+        }
+
         .robot-subtitle {
             font-size: 0.85rem;
             color: #666;
             margin-top: 4px;
         }
-        
+
         .robot-score {
             text-align: right;
         }
-        
+
         .score-value {
             font-size: 2.5rem;
             font-weight: 800;
         }
-        
+
         .score-label {
             font-size: 0.75rem;
             color: #666;
             text-transform: uppercase;
             letter-spacing: 0.1em;
         }
-        
+
         .robot-body {
             display: flex;
             gap: 24px;
             align-items: center;
         }
-        
+
         .robot-svg-wrap {
             flex: 0 0 180px;
         }
-        
+
         .robot-kpis {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        
+
         .kpi-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 14px;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.04);
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
-        
+
         .kpi-icon {
             width: 36px;
             height: 36px;
@@ -187,41 +205,43 @@
             justify-content: center;
             font-size: 1.1rem;
         }
-        
-        .kpi-info { flex: 1; }
-        
+
+        .kpi-info {
+            flex: 1;
+        }
+
         .kpi-name {
             font-size: 0.8rem;
             color: #888;
         }
-        
+
         .kpi-value {
             font-size: 1.2rem;
             font-weight: 600;
             margin-top: 2px;
         }
-        
+
         .kpi-bar {
             width: 80px;
             height: 6px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             overflow: hidden;
         }
-        
+
         .kpi-bar-fill {
             height: 100%;
             border-radius: 3px;
             transition: width 0.5s ease;
         }
-        
+
         .kpi-percent {
             width: 50px;
             text-align: right;
             font-weight: 600;
             font-size: 0.95rem;
         }
-        
+
         /* AI Analysis */
         .analysis-card {
             background: var(--card);
@@ -230,14 +250,14 @@
             border: 1px solid var(--border);
             margin-bottom: 30px;
         }
-        
+
         .analysis-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
         }
-        
+
         .analysis-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -245,7 +265,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .analysis-refresh {
             padding: 8px 16px;
             background: linear-gradient(135deg, var(--mindy-primary), var(--infron-primary));
@@ -257,33 +277,33 @@
             cursor: pointer;
             font-size: 0.85rem;
         }
-        
+
         .analysis-refresh:hover {
             opacity: 0.9;
         }
-        
+
         .analysis-content {
             font-size: 0.95rem;
             line-height: 1.7;
             color: #ccc;
         }
-        
+
         .analysis-content h2 {
             font-size: 1rem;
             color: #fff;
             margin: 16px 0 8px;
         }
-        
+
         .analysis-content h2:first-child {
             margin-top: 0;
         }
-        
+
         .analysis-loading {
             text-align: center;
             padding: 40px;
             color: #666;
         }
-        
+
         /* Tables */
         .tables-section {
             display: grid;
@@ -291,11 +311,13 @@
             gap: 30px;
             margin-bottom: 30px;
         }
-        
+
         @media (max-width: 1200px) {
-            .tables-section { grid-template-columns: 1fr; }
+            .tables-section {
+                grid-template-columns: 1fr;
+            }
         }
-        
+
         .table-card {
             background: var(--card);
             border-radius: 20px;
@@ -303,7 +325,7 @@
             border: 1px solid var(--border);
             overflow: hidden;
         }
-        
+
         .table-title {
             font-size: 1.1rem;
             font-weight: 600;
@@ -312,13 +334,13 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .data-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.85rem;
         }
-        
+
         .data-table th {
             text-align: left;
             padding: 10px 12px;
@@ -327,16 +349,16 @@
             border-bottom: 1px solid var(--border);
             white-space: nowrap;
         }
-        
+
         .data-table td {
             padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
-        
+
         .data-table tr:hover td {
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
         }
-        
+
         .rank-badge {
             display: inline-flex;
             align-items: center;
@@ -347,33 +369,56 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        
-        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
-        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
-        .rank-3 { background: linear-gradient(135deg, #cd7f32, #a66628); color: #fff; }
-        .rank-other { background: rgba(255,255,255,0.1); color: #888; }
-        
+
+        .rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #000;
+        }
+
+        .rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+            color: #000;
+        }
+
+        .rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #a66628);
+            color: #fff;
+        }
+
+        .rank-other {
+            background: rgba(255, 255, 255, 0.1);
+            color: #888;
+        }
+
         .stanowisko-badge {
             font-size: 0.7rem;
             padding: 2px 6px;
             border-radius: 4px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             color: #888;
         }
-        
+
         .percent-cell {
             font-weight: 600;
         }
-        
-        .status-good { color: var(--green); }
-        .status-warning { color: var(--yellow); }
-        .status-bad { color: var(--red); }
-        
+
+        .status-good {
+            color: var(--green);
+        }
+
+        .status-warning {
+            color: var(--yellow);
+        }
+
+        .status-bad {
+            color: var(--red);
+        }
+
         .per-day {
             font-size: 0.7rem;
             color: #666;
         }
-        
+
         /* Averages */
         .averages-bar {
             background: var(--card);
@@ -385,27 +430,27 @@
             gap: 24px;
             justify-content: center;
         }
-        
+
         .avg-item {
             text-align: center;
         }
-        
+
         .avg-label {
             font-size: 0.75rem;
             color: #666;
             margin-bottom: 4px;
         }
-        
+
         .avg-value {
             font-size: 1.1rem;
             font-weight: 600;
         }
-        
+
         .avg-unit {
             font-size: 0.75rem;
             color: #888;
         }
-        
+
         /* Footer */
         footer {
             text-align: center;
@@ -413,31 +458,125 @@
             color: #333;
             font-size: 0.75rem;
         }
-        
-        /* Robot SVG styles */
-        .robot-svg {
+
+        /* Robot Images */
+        .robot-img-container {
             width: 100%;
-            max-width: 180px;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
         }
-        
+
+        .robot-img {
+            max-width: 100%;
+            max-height: 100%;
+            filter: drop-shadow(0 0 20px rgba(77, 166, 255, 0.2));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .mood-happy .robot-img {
+            filter: drop-shadow(0 0 30px rgba(0, 230, 160, 0.4));
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        .mood-sad .robot-img {
+            filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.2));
+            animation: none;
+            opacity: 0.9;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .help-btn {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .help-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+
+        .help-modal {
+            margin-top: 12px;
+            background: #1a1b20;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #ccc;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .help-arrow {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 12px;
+            height: 12px;
+            background: #1a1b20;
+            border-left: 1px solid var(--border);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Legacy Robot SVG styles removed */
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .robot-float {
-            animation: float 3s ease-in-out infinite;
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="bg-effects"></div>
-    
+
     <div class="container">
         <header>
             <div class="logo">INFRAMINDS</div>
@@ -449,7 +588,7 @@
                 <span id="weekLabel" style="color: #666; font-size: 0.85rem;"></span>
             </div>
         </header>
-        
+
         <!-- Robots -->
         <div class="robots-grid">
             <!-- MINDY -->
@@ -465,13 +604,13 @@
                     </div>
                 </div>
                 <div class="robot-body">
-                    <div class="robot-svg-wrap">
-                        <svg class="robot-svg robot-float" id="mindy-robot" viewBox="0 0 200 320"></svg>
+                    <div class="robot-svg-wrap" id="mindy-robot">
+                        <!-- Robot Image will be injected here -->
                     </div>
                     <div class="robot-kpis" id="mindy-kpis"></div>
                 </div>
             </div>
-            
+
             <!-- INFRON -->
             <div class="robot-card infron">
                 <div class="robot-header">
@@ -485,14 +624,14 @@
                     </div>
                 </div>
                 <div class="robot-body">
-                    <div class="robot-svg-wrap">
-                        <svg class="robot-svg robot-float" id="infron-robot" viewBox="0 0 200 320"></svg>
+                    <div class="robot-svg-wrap" id="infron-robot">
+                        <!-- Robot Image will be injected here -->
                     </div>
                     <div class="robot-kpis" id="infron-kpis"></div>
                 </div>
             </div>
         </div>
-        
+
         <!-- AI Analysis -->
         <div class="analysis-card">
             <div class="analysis-header">
@@ -507,7 +646,7 @@
                 <div class="analysis-loading">Ładowanie analizy...</div>
             </div>
         </div>
-        
+
         <!-- Data Tables -->
         <div class="tables-section">
             <!-- Rekrutacja Table -->
@@ -525,13 +664,13 @@
                             <th>Weryf.</th>
                             <th>Reco</th>
                             <th>CV</th>
-                            <th>%</th>
+                            <th>Placements</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
             </div>
-            
+
             <!-- Sprzedaż Table -->
             <div class="table-card">
                 <div class="table-title" style="color: var(--infron-primary);">
@@ -554,7 +693,7 @@
                 </table>
             </div>
         </div>
-        
+
         <!-- Hit Ratio Table -->
         <div class="table-card" style="margin-bottom: 30px;">
             <div class="table-title" style="color: var(--mindy-primary);">
@@ -573,7 +712,7 @@
                 <tbody></tbody>
             </table>
         </div>
-        
+
         <!-- Averages -->
         <div class="averages-bar" id="averages-bar">
             <div class="avg-item">
@@ -597,16 +736,16 @@
                 <div class="avg-value" id="avg-mrr">--<span class="avg-unit"> zł</span></div>
             </div>
         </div>
-        
+
         <footer>
-            MINDY & INFRON © InfraMinds 2025 | 
+            MINDY & INFRON © InfraMinds 2025 |
             <a href="/admin" style="color: #666;">Panel Admin</a>
         </footer>
     </div>
 
     <script>
         let dashboardData = null;
-        
+
         // KPI configs
         const MINDY_KPIS = [
             { key: 'weryfikacje', name: 'Weryfikacje', icon: '👁', color: '#4da6ff', target: 20, stanowisko: 'Sourcer' },
@@ -614,46 +753,46 @@
             { key: 'cv_dodane', name: 'CV do bazy', icon: '📁', color: '#99ccff', target: 25, stanowisko: 'Rekruter' },
             { key: 'placements', name: 'Placements', icon: '🦿', color: '#00e6a0', target: 1, stanowisko: 'all' }
         ];
-        
+
         const INFRON_KPIS = [
             { key: 'leady', name: 'Leady', icon: '👁', color: '#ff8c42', target: 10, stanowisko: 'SDR' },
             { key: 'oferty', name: 'Wysłane oferty', icon: '✋', color: '#ffaa66', target: 1, stanowisko: 'BDM' },
             { key: 'mrr', name: 'MRR', icon: '💎', color: '#ffd54f', target: 4000, stanowisko: 'Head of Technology' }
         ];
-        
+
         function getStatusColor(percent) {
             if (percent >= 100) return 'var(--green)';
             if (percent >= 70) return 'var(--yellow)';
             return 'var(--red)';
         }
-        
+
         function getStatusClass(percent) {
             if (percent >= 100) return 'status-good';
             if (percent >= 70) return 'status-warning';
             return 'status-bad';
         }
-        
+
         function createRobotSVG(containerId, kpiData, type) {
             const container = document.getElementById(containerId);
             const isMindy = type === 'mindy';
             const primaryColor = isMindy ? '#4da6ff' : '#ff8c42';
             const secondaryColor = isMindy ? '#66b3ff' : '#ffaa66';
-            
+
             // Calculate colors based on KPI performance
             const getColor = (percent) => {
                 if (percent >= 100) return '#00e6a0';
                 if (percent >= 70) return '#ffd54f';
                 return '#ff6b6b';
             };
-            
+
             const eyeColor = getColor(kpiData.eye || 80);
             const brainColor = getColor(kpiData.brain || 80);
             const heartColor = getColor(kpiData.heart || 80);
             const legsColor = getColor(kpiData.legs || 80);
             const handsColor = getColor(kpiData.hands || 80);
-            
+
             const allGood = Object.values(kpiData).every(v => v >= 100);
-            
+
             container.innerHTML = `
                 <defs>
                     <linearGradient id="bodyGrad-${type}" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -766,47 +905,200 @@
                 `}
             `;
         }
-        
-        function renderKPIList(containerId, kpis, data, targets) {
-            const container = document.getElementById(containerId);
-            
-            container.innerHTML = kpis.map(kpi => {
-                const value = data[kpi.key] || 0;
-                const target = getTarget(kpi.key, targets) || kpi.target;
-                const percent = Math.round((value / target) * 100);
-                const color = getStatusColor(percent);
-                
-                return `
-                    <div class="kpi-item">
-                        <div class="kpi-icon" style="background: ${kpi.color}22; color: ${kpi.color}">
-                            ${kpi.icon}
-                        </div>
-                        <div class="kpi-info">
-                            <div class="kpi-name">${kpi.name}</div>
-                            <div class="kpi-value" style="color: ${color}">${formatValue(value, kpi.key)}</div>
-                        </div>
-                        <div class="kpi-bar">
-                            <div class="kpi-bar-fill" style="width: ${Math.min(percent, 100)}%; background: ${color};"></div>
-                        </div>
-                        <div class="kpi-percent" style="color: ${color}">${percent}%</div>
+
+        async function refreshAnalysis() {
+            const content = document.getElementById('analysis-content');
+            content.innerHTML = '<div class="analysis-loading">Generowanie nowej analizy...</div>';
+
+            try {
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rok: dashboardData.rok,
+                        tydzien: dashboardData.tydzien
+                    })
+                });
+
+                const data = await res.json();
+                if (data.analysis) {
+                    content.innerHTML = formatAnalysis(data.analysis);
+                } else {
+                    content.innerHTML = '<div style="padding:20px; text-align:center;">Brak analizy.</div>';
+                }
+            } catch (err) {
+                content.innerHTML = '<div style="color:#ff6b6b">Błąd generowania analizy</div>';
+            }
+        }
+
+        function updateDashboard(data) {
+            dashboardData = data;
+
+            document.getElementById('weekLabel').textContent = `Rok ${data.rok}, Tydzień ${data.tydzien}`;
+
+            // Render Robots with Dynamic Targets
+            renderRobot('mindy', MINDY_KPIS, data.current, data.targets, data.teamCounts);
+            renderRobot('infron', INFRON_KPIS, data.current, data.targets, data.teamCounts);
+
+            // Render Tables
+            renderTable('rekrutacja', data.current.rekrutacja);
+            renderTable('sprzedaz', data.current.sprzedaz);
+            renderHitRatioTable(data.current.hitRatio);
+
+            // Render Averages
+            const avg = data.average;
+            const avgRekrutacja = avg.rekrutacja[0] || {};
+            const avgSprzedaz = avg.sprzedaz[0] || {};
+
+            document.getElementById('avg-weryf').textContent = (avgRekrutacja.avg_weryfikacje || 0).toFixed(1);
+            document.getElementById('avg-reco').textContent = (avgRekrutacja.avg_rekomendacje || 0).toFixed(1);
+            document.getElementById('avg-cv').textContent = (avgRekrutacja.avg_cv || 0).toFixed(1);
+            document.getElementById('avg-leady').textContent = (avgSprzedaz.avg_leady || 0).toFixed(1);
+            document.getElementById('avg-mrr').textContent = (avgSprzedaz.avg_mrr || 0).toLocaleString();
+
+            // Analysis
+            const analysisContent = document.getElementById('analysis-content');
+            if (data.analysis) {
+                analysisContent.innerHTML = formatAnalysis(data.analysis);
+            } else {
+                analysisContent.innerHTML = '<div class="analysis-loading">Brak analizy dla tego tygodnia.</div>';
+            }
+        }
+
+        async function askForHelp(type, score, kpiData) {
+            const modalId = `${type}-help-modal`;
+            const contentId = `${type}-help-content`;
+
+            // Toggle visibility if already open
+            const helpContainer = document.getElementById(modalId);
+            if (helpContainer.style.display === 'block') {
+                helpContainer.style.display = 'none';
+                return;
+            }
+
+            helpContainer.style.display = 'block';
+            document.getElementById(contentId).innerHTML = '<div class="analysis-loading">🤖 Analizuję sytuację...</div>';
+
+            try {
+                const res = await fetch('/api/analyze-department', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        department: type,
+                        score: score,
+                        kpis: kpiData,
+                        rok: dashboardData.rok,
+                        tydzien: dashboardData.tydzien
+                    })
+                });
+
+                const data = await res.json();
+                document.getElementById(contentId).innerHTML = data.analysis || 'Błąd analizy.';
+
+            } catch (err) {
+                document.getElementById(contentId).innerHTML = '<div style="color:#ff6b6b">Nie udało się połączyć z AI.</div>';
+            }
+        }
+
+        function renderRobot(type, kpis, currentData, targets, teamCounts) {
+            const isMindy = type === 'mindy';
+            const peopleData = isMindy ? currentData.rekrutacja : currentData.sprzedaz;
+
+            // Aggregate current totals
+            const totals = {};
+            kpis.forEach(kpi => {
+                totals[kpi.key] = peopleData.reduce((sum, p) => sum + (p[kpi.key] || 0), 0);
+            });
+
+            // Calculate scores & prepare KPI data for render
+            let totalPercent = 0;
+            const kpiRenderData = kpis.map(kpi => {
+                const baseTarget = getTarget(kpi.key, targets) || kpi.target;
+
+                // Dynamic Target Scaling
+                let multiplier = 1;
+                if (kpi.stanowisko !== 'all') {
+                    const roleKey = kpi.stanowisko.toLowerCase().includes('rekruter') ? 'rekruter' :
+                        kpi.stanowisko.toLowerCase();
+                    multiplier = teamCounts[roleKey] || 1;
+                } else {
+                    multiplier = (teamCounts.sourcer + teamCounts.rekruter) || 1;
+                }
+
+                if (multiplier < 1) multiplier = 1;
+                const finalTarget = baseTarget * multiplier;
+
+                const value = totals[kpi.key];
+                const percent = Math.round((value / finalTarget) * 100);
+                totalPercent += percent;
+
+                return { ...kpi, value, percent, target: finalTarget };
+            });
+
+            const overallScore = Math.round(totalPercent / kpis.length);
+            document.getElementById(`${type}-score`).textContent = `${overallScore}%`;
+            document.getElementById(`${type}-score`).style.color = getStatusColor(overallScore);
+
+            // Render KPI List
+            document.getElementById(`${type}-kpis`).innerHTML = kpiRenderData.map(k => `
+                <div class="kpi-item">
+                    <div class="kpi-icon" style="background: ${k.color}22; color: ${k.color}">
+                        ${k.icon}
                     </div>
-                `;
-            }).join('');
+                    <div class="kpi-info">
+                        <div class="kpi-name">${k.name} (Cel: ${k.target})</div>
+                        <div class="kpi-value" style="color: ${getStatusColor(k.percent)}">
+                            ${formatValue(k.value, k.key)}
+                        </div>
+                    </div>
+                    <div class="kpi-bar">
+                        <div class="kpi-bar-fill" style="width: ${Math.min(k.percent, 100)}%; background: ${getStatusColor(k.percent)};"></div>
+                    </div>
+                    <div class="kpi-percent" style="color: ${getStatusColor(k.percent)}">${k.percent}%</div>
+                </div>
+            `).join('');
+
+            // Robot Image Logic
+            let robotImg = 'robot-neutral.png';
+            let moodClass = '';
+
+            if (overallScore >= 100) {
+                robotImg = 'robot-happy.png';
+                moodClass = 'mood-happy';
+                triggerConfetti(type);
+            } else if (overallScore < 70) {
+                robotImg = 'robot-sad.png';
+                moodClass = 'mood-sad';
+            }
+
+            const robotContainer = document.getElementById(`${type}-robot`);
+            robotContainer.innerHTML = `
+                <div class="robot-img-container ${moodClass}">
+                    <img src="/images/${robotImg}" alt="Robot ${type}" class="robot-img">
+                </div>
+                <button class="help-btn" onclick='askForHelp("${type}", ${overallScore}, ${JSON.stringify(kpiRenderData).replace(/'/g, "&#39;")})'>
+                    🆘 Jak mi pomóc?
+                </button>
+                <div id="${type}-help-modal" class="help-modal" style="display:none;">
+                    <div class="help-arrow"></div>
+                    <div id="${type}-help-content"></div>
+                </div>
+            `;
         }
-        
-        function getTarget(kpi, targets) {
-            const t = targets.find(t => t.kpi === kpi);
-            return t ? t.wartosc : null;
+
+        function triggerConfetti(type) {
+            // Simple confetti effect could be added here via canvas or CSS particles
+            // For now, we rely on the happy image's built-in "party" look
         }
-        
+
         function formatValue(value, key) {
             if (key === 'mrr') return value.toLocaleString() + ' zł';
             return value;
         }
-        
+
         function calculateTeamTotals(data, type) {
             const totals = {};
-            
+
             if (type === 'rekrutacja') {
                 totals.weryfikacje = data.reduce((sum, r) => sum + (r.weryfikacje || 0), 0);
                 totals.rekomendacje = data.reduce((sum, r) => sum + (r.rekomendacje || 0), 0);
@@ -819,17 +1111,17 @@
                 totals.mrr = data.reduce((sum, r) => sum + (r.mrr || 0), 0);
                 totals.dni = data.reduce((sum, r) => sum + (r.dni_pracy || 0), 0);
             }
-            
+
             return totals;
         }
-        
+
         function calculatePersonPercent(person, targets, type) {
             let totalPercent = 0;
             let count = 0;
-            
+
             if (type === 'rekrutacja') {
                 const stan = person.stanowisko.toLowerCase();
-                
+
                 if (stan.includes('sourcer')) {
                     const wTarget = getTarget('weryfikacje', targets) || 20;
                     const rTarget = getTarget('rekomendacje', targets) || 15;
@@ -844,7 +1136,7 @@
                 }
             } else {
                 const stan = person.stanowisko.toLowerCase();
-                
+
                 if (stan.includes('sdr')) {
                     const lTarget = getTarget('leady', targets) || 10;
                     totalPercent += (person.leady / lTarget) * 100;
@@ -861,60 +1153,70 @@
                     count += 1;
                 }
             }
-            
+
             return count > 0 ? Math.round(totalPercent / count) : 0;
         }
-        
-        function renderTable(tableId, data, type, targets) {
-            const tbody = document.querySelector(`#${tableId} tbody`);
-            
-            // Add percent and sort
-            const withPercent = data.map(p => ({
-                ...p,
-                percent: calculatePersonPercent(p, targets, type)
-            })).sort((a, b) => b.percent - a.percent);
-            
-            if (type === 'rekrutacja') {
-                tbody.innerHTML = withPercent.map((p, i) => `
-                    <tr>
-                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
-                        <td><strong>${p.imie}</strong></td>
-                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
-                        <td>${p.dni_pracy}</td>
-                        <td>${p.weryfikacje || '-'} ${p.weryfikacje ? `<span class="per-day">(${(p.weryfikacje/p.dni_pracy).toFixed(1)}/d)</span>` : ''}</td>
-                        <td>${p.rekomendacje || '-'}</td>
-                        <td>${p.cv_dodane || '-'}</td>
-                        <td class="percent-cell ${getStatusClass(p.percent)}">${p.percent}%</td>
-                    </tr>
-                `).join('');
-            } else {
-                tbody.innerHTML = withPercent.map((p, i) => `
-                    <tr>
-                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
-                        <td><strong>${p.imie}</strong></td>
-                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
-                        <td>${p.dni_pracy}</td>
-                        <td>${p.leady || '-'}</td>
-                        <td>${p.oferty || '-'}</td>
-                        <td>${p.mrr ? p.mrr.toLocaleString() + ' zł' : '-'}</td>
-                        <td class="percent-cell ${getStatusClass(p.percent)}">${p.percent}%</td>
-                    </tr>
-                `).join('');
+
+        function renderTable(type, data) {
+            const tbody = document.querySelector(`#table-${type} tbody`);
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:#666;">Brak danych</td></tr>';
+                return;
             }
+
+            tbody.innerHTML = data.map((row, idx) => {
+                const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : 'rank-other';
+                const rankIcon = idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : (idx + 1);
+
+                // Special columns logic
+                const isRekrutacja = type === 'rekrutacja';
+
+                // Highlight Placement column
+                const placementStyle = isRekrutacja ? 'background: rgba(0, 230, 160, 0.1); color: #00e6a0; font-weight: bold;' : '';
+
+                if (isRekrutacja) {
+                    return `
+                        <tr>
+                            <td><span class="rank-badge ${rankClass}">${rankIcon}</span></td>
+                            <td style="font-weight:600">${row.imie}</td>
+                            <td><span class="stanowisko-badge">${row.stanowisko}</span></td>
+                            <td class="per-day">${row.dni_pracy} d</td>
+                            <td>${row.weryfikacje}</td>
+                            <td>${row.rekomendacje}</td>
+                            <td>${row.cv_dodane}</td>
+                            <td style="${placementStyle}">${row.placements}</td>
+                        </tr>
+                    `;
+                } else {
+                    return `
+                        <tr>
+                            <td><span class="rank-badge ${rankClass}">${rankIcon}</span></td>
+                            <td style="font-weight:600">${row.imie}</td>
+                            <td><span class="stanowisko-badge">${row.stanowisko}</span></td>
+                            <td class="per-day">${row.dni_pracy} d</td>
+                            <td>${row.leady}</td>
+                            <td>${row.oferty}</td>
+                            <td>${row.mrr}</td>
+                            <td style="color:var(--infron-primary)">-</td>
+                        </tr>
+                    `;
+                }
+            }).join('');
         }
-        
+
         function renderHitRatioTable(data) {
             const tbody = document.querySelector('#table-hitratio tbody');
-            
+
             if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;">Brak danych Hit Ratio</td></tr>';
                 return;
             }
-            
+
             tbody.innerHTML = data.map(h => {
                 const status = h.hit_ratio >= 30 ? 'status-good' : 'status-bad';
                 const statusText = h.hit_ratio >= 30 ? '✅ Cel osiągnięty' : '⚠️ Poniżej 30%';
-                
+
                 return `
                     <tr>
                         <td><strong>${h.imie}</strong></td>
@@ -926,11 +1228,11 @@
                 `;
             }).join('');
         }
-        
+
         function calculateOverallScore(totals, targets, type) {
             let score = 0;
             let count = 0;
-            
+
             if (type === 'rekrutacja') {
                 // This is simplified - in reality would need to count people per role
                 score += (totals.weryfikacje / 60) * 100; // Assume 3 sourcers
@@ -943,13 +1245,13 @@
                 score += (totals.mrr / (getTarget('mrr', targets) || 4000)) * 100;
                 count = 3;
             }
-            
+
             return Math.round(score / count);
         }
-        
+
         function renderAverages(data) {
             if (!data.rekrutacja || data.rekrutacja.length === 0) return;
-            
+
             // Calculate per-day averages
             let totalDniRek = 0, totalWeryf = 0, totalReco = 0, totalCV = 0;
             data.rekrutacja.forEach(r => {
@@ -958,34 +1260,34 @@
                 totalReco += r.avg_rekomendacje || 0;
                 totalCV += r.avg_cv || 0;
             });
-            
+
             let totalDniSales = 0, totalLeady = 0, totalMrr = 0;
             data.sprzedaz.forEach(s => {
                 totalDniSales += s.avg_dni || 0;
                 totalLeady += s.avg_leady || 0;
                 totalMrr += s.avg_mrr || 0;
             });
-            
+
             document.getElementById('avg-weryf').textContent = totalDniRek > 0 ? (totalWeryf / data.rekrutacja.length).toFixed(1) : '--';
             document.getElementById('avg-reco').textContent = totalDniRek > 0 ? (totalReco / data.rekrutacja.length).toFixed(1) : '--';
             document.getElementById('avg-cv').textContent = totalDniRek > 0 ? (totalCV / data.rekrutacja.length).toFixed(1) : '--';
             document.getElementById('avg-leady').textContent = totalDniSales > 0 ? (totalLeady / data.sprzedaz.length).toFixed(1) : '--';
             document.getElementById('avg-mrr').innerHTML = totalMrr > 0 ? (totalMrr / data.sprzedaz.length).toFixed(0) + '<span class="avg-unit"> zł</span>' : '--';
         }
-        
+
         async function loadDashboard(rok, tydzien) {
             try {
                 const params = new URLSearchParams();
                 if (rok) params.append('rok', rok);
                 if (tydzien) params.append('tydzien', tydzien);
-                
+
                 const response = await fetch('/api/dashboard?' + params);
                 dashboardData = await response.json();
-                
+
                 // Populate week selector
                 const weekSelect = document.getElementById('weekSelect');
                 if (dashboardData.weeks && dashboardData.weeks.length > 0) {
-                    weekSelect.innerHTML = dashboardData.weeks.map(w => 
+                    weekSelect.innerHTML = dashboardData.weeks.map(w =>
                         `<option value="${w.rok}-${w.tydzien}" ${w.rok === dashboardData.rok && w.tydzien === dashboardData.tydzien ? 'selected' : ''}>
                             Tydzień ${w.tydzien} / ${w.rok}
                         </option>`
@@ -995,16 +1297,16 @@
                     const currentWeek = getWeekNumber(now);
                     weekSelect.innerHTML = `<option value="${now.getFullYear()}-${currentWeek}">Tydzień ${currentWeek} / ${now.getFullYear()}</option>`;
                 }
-                
+
                 // Calculate totals
                 const rekTotals = calculateTeamTotals(dashboardData.current.rekrutacja, 'rekrutacja');
                 const salesTotals = calculateTeamTotals(dashboardData.current.sprzedaz, 'sprzedaz');
-                
+
                 // Render MINDY
                 const mindyScore = calculateOverallScore(rekTotals, dashboardData.targets, 'rekrutacja');
                 document.getElementById('mindy-score').textContent = mindyScore + '%';
                 document.getElementById('mindy-score').style.color = getStatusColor(mindyScore);
-                
+
                 createRobotSVG('mindy-robot', {
                     eye: rekTotals.weryfikacje > 0 ? (rekTotals.weryfikacje / 60) * 100 : 50,
                     brain: rekTotals.rekomendacje > 0 ? (rekTotals.rekomendacje / 45) * 100 : 50,
@@ -1012,14 +1314,14 @@
                     hands: 80,
                     legs: rekTotals.placements > 0 ? (rekTotals.placements / 3) * 100 : 50
                 }, 'mindy');
-                
+
                 renderKPIList('mindy-kpis', MINDY_KPIS, rekTotals, dashboardData.targets);
-                
+
                 // Render INFRON
                 const infronScore = calculateOverallScore(salesTotals, dashboardData.targets, 'sprzedaz');
                 document.getElementById('infron-score').textContent = infronScore + '%';
                 document.getElementById('infron-score').style.color = getStatusColor(infronScore);
-                
+
                 createRobotSVG('infron-robot', {
                     eye: salesTotals.leady > 0 ? (salesTotals.leady / 10) * 100 : 50,
                     brain: 80,
@@ -1027,29 +1329,29 @@
                     hands: salesTotals.oferty > 0 ? (salesTotals.oferty / 1) * 100 : 50,
                     legs: 80
                 }, 'infron');
-                
+
                 renderKPIList('infron-kpis', INFRON_KPIS, salesTotals, dashboardData.targets);
-                
+
                 // Render tables
                 renderTable('table-rekrutacja', dashboardData.current.rekrutacja, 'rekrutacja', dashboardData.targets);
                 renderTable('table-sprzedaz', dashboardData.current.sprzedaz, 'sprzedaz', dashboardData.targets);
                 renderHitRatioTable(dashboardData.current.hitRatio);
-                
+
                 // Render averages
                 renderAverages(dashboardData.average);
-                
+
                 // Render analysis
                 if (dashboardData.analysis) {
                     document.getElementById('analysis-content').innerHTML = formatAnalysis(dashboardData.analysis);
                 } else {
                     document.getElementById('analysis-content').innerHTML = '<div class="analysis-loading">Kliknij "Odśwież analizę" aby wygenerować AI analizę</div>';
                 }
-                
+
             } catch (err) {
                 console.error('Error loading dashboard:', err);
             }
         }
-        
+
         function formatAnalysis(text) {
             // Convert markdown-ish to HTML
             return text
@@ -1058,11 +1360,11 @@
                 .replace(/\n- /g, '<br>• ')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
-        
+
         async function refreshAnalysis() {
             const content = document.getElementById('analysis-content');
             content.innerHTML = '<div class="analysis-loading">🤖 Generuję analizę AI...</div>';
-            
+
             try {
                 const response = await fetch('/api/analyze', {
                     method: 'POST',
@@ -1072,33 +1374,34 @@
                         tydzien: dashboardData?.tydzien
                     })
                 });
-                
+
                 const result = await response.json();
                 content.innerHTML = formatAnalysis(result.analysis);
-                
+
             } catch (err) {
                 content.innerHTML = '<div style="color: var(--red);">Błąd generowania analizy</div>';
             }
         }
-        
+
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
             const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
-        
+
         // Week selector change
-        document.getElementById('weekSelect').addEventListener('change', function() {
+        document.getElementById('weekSelect').addEventListener('change', function () {
             const [rok, tydzien] = this.value.split('-');
             loadDashboard(parseInt(rok), parseInt(tydzien));
         });
-        
+
         // Initial load
         loadDashboard();
-        
+
         // Auto refresh every 5 minutes
         setInterval(() => loadDashboard(), 5 * 60 * 1000);
     </script>
 </body>
+
 </html>

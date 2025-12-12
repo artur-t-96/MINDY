@@ -1,13 +1,18 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MINDY & INFRON - Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             min-height: 100vh;
             background: #0a0b10;
@@ -15,12 +20,12 @@
             color: #fff;
             padding: 40px 20px;
         }
-        
+
         .container {
             max-width: 900px;
             margin: 0 auto;
         }
-        
+
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -29,8 +34,11 @@
             text-decoration: none;
             margin-bottom: 30px;
         }
-        .back-link:hover { color: #fff; }
-        
+
+        .back-link:hover {
+            color: #fff;
+        }
+
         h1 {
             font-size: 2rem;
             margin-bottom: 8px;
@@ -38,17 +46,20 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
-        .subtitle { color: #666; margin-bottom: 30px; }
-        
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
         .card {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .card-title {
             font-size: 1.1rem;
             font-weight: 600;
@@ -57,118 +68,126 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 16px;
             margin-bottom: 20px;
         }
-        
+
         @media (max-width: 600px) {
-            .form-row { grid-template-columns: 1fr; }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
         }
-        
-        .form-group { margin-bottom: 16px; }
-        
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
         label {
             display: block;
             font-size: 0.85rem;
             color: #888;
             margin-bottom: 6px;
         }
-        
-        input, select {
+
+        input,
+        select {
             width: 100%;
             padding: 12px 16px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             color: #fff;
             font-family: inherit;
             font-size: 1rem;
         }
-        
-        input:focus, select:focus {
+
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #4da6ff;
         }
-        
-        select option { background: #1a1b20; }
-        
+
+        select option {
+            background: #1a1b20;
+        }
+
         /* Drop Zone */
         .drop-zone {
-            border: 2px dashed rgba(255,255,255,0.15);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
             border-radius: 16px;
             padding: 60px 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            background: rgba(255,255,255,0.01);
+            background: rgba(255, 255, 255, 0.01);
             margin-bottom: 20px;
         }
-        
+
         .drop-zone:hover {
             border-color: rgba(77, 166, 255, 0.5);
             background: rgba(77, 166, 255, 0.05);
         }
-        
+
         .drop-zone.dragover {
             border-color: #4da6ff;
             background: rgba(77, 166, 255, 0.1);
             transform: scale(1.01);
         }
-        
+
         .drop-zone-icon {
             font-size: 4rem;
             margin-bottom: 16px;
         }
-        
+
         .drop-zone-text {
             font-size: 1.2rem;
             color: #888;
             margin-bottom: 8px;
         }
-        
+
         .drop-zone-hint {
             font-size: 0.85rem;
             color: #555;
         }
-        
+
         /* File List */
         .file-list {
             margin-bottom: 20px;
         }
-        
+
         .file-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px 16px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 10px;
             margin-bottom: 8px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
+
         .file-icon {
             font-size: 1.5rem;
         }
-        
+
         .file-info {
             flex: 1;
         }
-        
+
         .file-name {
             font-weight: 500;
             margin-bottom: 2px;
         }
-        
+
         .file-size {
             font-size: 0.75rem;
             color: #666;
         }
-        
+
         .file-remove {
             background: none;
             border: none;
@@ -179,11 +198,11 @@
             border-radius: 6px;
             transition: background 0.2s;
         }
-        
+
         .file-remove:hover {
             background: rgba(255, 107, 107, 0.1);
         }
-        
+
         /* Button */
         button.primary {
             width: 100%;
@@ -202,18 +221,18 @@
             justify-content: center;
             gap: 10px;
         }
-        
+
         button.primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(77, 166, 255, 0.3);
         }
-        
+
         button.primary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         /* Results */
         .result-card {
             background: rgba(0, 230, 160, 0.05);
@@ -222,12 +241,12 @@
             padding: 20px;
             margin-top: 20px;
         }
-        
+
         .result-card.error {
             background: rgba(255, 107, 107, 0.05);
             border-color: rgba(255, 107, 107, 0.2);
         }
-        
+
         .result-title {
             font-weight: 600;
             margin-bottom: 12px;
@@ -235,147 +254,170 @@
             align-items: center;
             gap: 8px;
         }
-        
-        .result-title.success { color: #00e6a0; }
-        .result-title.error { color: #ff6b6b; }
-        
+
+        .result-title.success {
+            color: #00e6a0;
+        }
+
+        .result-title.error {
+            color: #ff6b6b;
+        }
+
         .result-summary {
             font-size: 0.95rem;
             color: #ccc;
             margin-bottom: 12px;
             line-height: 1.6;
         }
-        
+
         .result-details {
             font-size: 0.85rem;
             color: #888;
         }
-        
+
         .result-item {
             display: flex;
             align-items: center;
             gap: 8px;
             padding: 6px 0;
         }
-        
+
         .result-badge {
             font-size: 0.7rem;
             padding: 3px 8px;
             border-radius: 4px;
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
         }
-        
-        .result-badge.rekrutacja { background: rgba(77, 166, 255, 0.2); color: #4da6ff; }
-        .result-badge.sprzedaz { background: rgba(255, 140, 66, 0.2); color: #ff8c42; }
-        .result-badge.hit_ratio { background: rgba(0, 230, 160, 0.2); color: #00e6a0; }
-        .result-badge.prep_calls { background: rgba(255, 213, 79, 0.2); color: #ffd54f; }
-        
+
+        .result-badge.rekrutacja {
+            background: rgba(77, 166, 255, 0.2);
+            color: #4da6ff;
+        }
+
+        .result-badge.sprzedaz {
+            background: rgba(255, 140, 66, 0.2);
+            color: #ff8c42;
+        }
+
+        .result-badge.hit_ratio {
+            background: rgba(0, 230, 160, 0.2);
+            color: #00e6a0;
+        }
+
+        .result-badge.prep_calls {
+            background: rgba(255, 213, 79, 0.2);
+            color: #ffd54f;
+        }
+
         .warnings {
             margin-top: 12px;
             padding: 12px;
             background: rgba(255, 213, 79, 0.1);
             border-radius: 8px;
         }
-        
+
         .warnings-title {
             font-size: 0.85rem;
             color: #ffd54f;
             margin-bottom: 8px;
         }
-        
+
         .warning-item {
             font-size: 0.8rem;
             color: #ccc;
             padding: 4px 0;
         }
-        
+
         /* Analysis Preview */
         .analysis-preview {
             margin-top: 20px;
             padding: 20px;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
             font-size: 0.9rem;
             line-height: 1.7;
             color: #ccc;
         }
-        
+
         .analysis-preview h2 {
             font-size: 1rem;
             color: #fff;
             margin: 16px 0 8px;
         }
-        
+
         .analysis-preview h2:first-child {
             margin-top: 0;
         }
-        
+
         /* Loading */
         .loading {
             display: none;
             text-align: center;
             padding: 40px;
         }
-        
+
         .loading.active {
             display: block;
         }
-        
+
         .spinner {
             width: 50px;
             height: 50px;
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top-color: #4da6ff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .loading-text {
             color: #888;
         }
-        
+
         /* History */
         .history-item {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border-radius: 8px;
             margin-bottom: 8px;
         }
-        
+
         .history-date {
             font-size: 0.75rem;
             color: #666;
         }
-        
+
         .history-info {
             flex: 1;
         }
-        
+
         .history-files {
             font-size: 0.85rem;
         }
-        
+
         .history-count {
             font-size: 0.75rem;
             color: #888;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <a href="/" class="back-link">← Powrót do Dashboard</a>
-        
+
         <h1>🤖 Inteligentny Import</h1>
         <p class="subtitle">Wgraj dowolne pliki Excel — AI rozpozna dane automatycznie</p>
-        
+
         <!-- Auth & Period -->
         <div class="card">
             <div class="form-row">
@@ -393,53 +435,65 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Upload Zone -->
         <div class="card">
-            <div class="card-title">📤 Upload plików Excel</div>
-            
+            <div class="card-title">📤 1. Wgraj pliki na serwer</div>
+
             <div class="drop-zone" id="dropZone">
                 <div class="drop-zone-icon">📁</div>
                 <div class="drop-zone-text">Przeciągnij pliki Excel tutaj</div>
                 <div class="drop-zone-hint">lub kliknij aby wybrać • możesz wgrać kilka plików naraz</div>
                 <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv" style="display:none">
             </div>
-            
+
             <div class="file-list" id="fileList"></div>
-            
-            <button class="primary" id="uploadBtn" disabled>
-                <span>🤖</span>
-                <span>Analizuj i importuj</span>
+
+            <button class="primary" id="uploadBtn" disabled
+                style="background: linear-gradient(135deg, #4da6ff, #66b3ff);">
+                <span>📤</span>
+                <span>Wgraj pliki na serwer</span>
             </button>
-            
+        </div>
+
+        <!-- File Library & Analysis -->
+        <div class="card">
+            <div class="card-title">📂 2. Wybierz pliki do analizy AI</div>
+            <p style="color:#888; font-size:0.9rem; margin-bottom:15px;">Zaznacz pliki, które chcesz przeanalizować dla
+                wybranego tygodnia.</p>
+
+            <div class="file-list" id="serverFilesList">
+                <div style="padding:20px; text-align:center;">Ładowanie plików z serwera...</div>
+            </div>
+
+            <button class="primary" id="analyzeBtn"
+                style="background: linear-gradient(135deg, #00e6a0, #00c88d); display:none;">
+                <span>🤖</span>
+                <span>Analizuj zaznaczone</span>
+            </button>
+
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <div class="loading-text">AI analizuje pliki...</div>
+                <div class="loading-text">AI analizuje dane...</div>
             </div>
-            
+
             <div id="result"></div>
         </div>
-        
+
         <!-- How it works -->
         <div class="card">
             <div class="card-title">🧠 Jak to działa?</div>
             <div style="font-size: 0.9rem; color: #888; line-height: 1.8;">
-                <p><strong>1.</strong> Wgrywasz dowolne pliki Excel z danymi KPI</p>
-                <p><strong>2.</strong> AI (Claude) analizuje strukturę i rozpoznaje:</p>
+                <p><strong>1.</strong> Wgrywasz pliki Excel na serwer (strefa 1).</p>
+                <p><strong>2.</strong> Wybierasz z listy pliki, które chcesz uwzględnić w dashboardzie (strefa 2).</p>
+                <p><strong>3.</strong> Klikasz "Analizuj zaznaczone" — AI przetwarza tylko wybrane pliki.</p>
                 <ul style="margin: 8px 0 8px 20px;">
-                    <li>Dane rekrutacji (weryfikacje, rekomendacje, CV, placements)</li>
-                    <li>Dane sprzedaży (leady, oferty, MRR)</li>
-                    <li>Hit Ratio Delivery Leadów</li>
-                    <li>Prep Calls z dynamiczną checklistą</li>
+                    <li>Możesz usuwać stare, niepotrzebne pliki.</li>
+                    <li>Status "Przeanalizowany" pomaga śledzić postęp.</li>
                 </ul>
-                <p><strong>3.</strong> Dane są automatycznie zapisywane do bazy</p>
-                <p><strong>4.</strong> Dashboard się aktualizuje</p>
-                <p style="margin-top: 12px; color: #666;">
-                    💡 Nie musisz trzymać się konkretnego formatu — AI rozpozna kolumny inteligentnie!
-                </p>
             </div>
         </div>
-        
+
         <!-- History -->
         <div class="card">
             <div class="card-title">📜 Historia importów</div>
@@ -452,141 +506,223 @@
         const now = new Date();
         document.getElementById('rok').value = now.getFullYear();
         document.getElementById('tydzien').value = getWeekNumber(now);
-        
+
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
             const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
-        
-        // File handling
-        let selectedFiles = [];
-        
+
+        // File Upload handling
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
         const uploadBtn = document.getElementById('uploadBtn');
-        
+        let filesToUpload = [];
+
         dropZone.addEventListener('click', () => fileInput.click());
-        
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
-        
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-        
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
             handleFiles(e.dataTransfer.files);
         });
-        
-        fileInput.addEventListener('change', () => {
-            handleFiles(fileInput.files);
-        });
-        
+        fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+
         function handleFiles(files) {
             for (const file of files) {
-                if (!selectedFiles.find(f => f.name === file.name)) {
-                    selectedFiles.push(file);
+                if (!filesToUpload.find(f => f.name === file.name)) {
+                    filesToUpload.push(file);
                 }
             }
-            renderFileList();
+            renderUploadList();
         }
-        
-        function renderFileList() {
-            if (selectedFiles.length === 0) {
+
+        function renderUploadList() {
+            if (filesToUpload.length === 0) {
                 fileList.innerHTML = '';
                 uploadBtn.disabled = true;
                 return;
             }
-            
-            fileList.innerHTML = selectedFiles.map((file, idx) => `
+            fileList.innerHTML = filesToUpload.map((file, idx) => `
                 <div class="file-item">
                     <div class="file-icon">📄</div>
                     <div class="file-info">
                         <div class="file-name">${file.name}</div>
-                        <div class="file-size">${formatSize(file.size)}</div>
+                        <div class="file-size">${formatSize(file.size)} (Nowy)</div>
                     </div>
-                    <button class="file-remove" onclick="removeFile(${idx})">✕</button>
+                    <button class="file-remove" onclick="removeUploadFile(${idx})">✕</button>
                 </div>
             `).join('');
-            
             uploadBtn.disabled = false;
         }
-        
-        function removeFile(idx) {
-            selectedFiles.splice(idx, 1);
-            renderFileList();
+
+        window.removeUploadFile = function (idx) {
+            filesToUpload.splice(idx, 1);
+            renderUploadList();
         }
-        
+
+        // Upload Button Action (Just Upload)
+        uploadBtn.addEventListener('click', async () => {
+            const password = document.getElementById('password').value;
+            if (!password) { alert('Wprowadź hasło'); return; }
+            if (filesToUpload.length === 0) return;
+
+            uploadBtn.innerHTML = '⏳ Wgrywanie...';
+            uploadBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('password', password);
+            filesToUpload.forEach(file => formData.append('files', file));
+
+            try {
+                const res = await fetch('/admin/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    filesToUpload = [];
+                    renderUploadList();
+                    loadServerFiles();
+                } else {
+                    alert('Błąd: ' + data.error);
+                }
+            } catch (err) {
+                alert('Błąd połączenia: ' + err.message);
+            } finally {
+                uploadBtn.innerHTML = '<span>📤</span><span>Wgraj pliki na serwer</span>';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        // Server Files Library
+        async function loadServerFiles() {
+            try {
+                const res = await fetch('/admin/files-list');
+                const files = await res.json();
+                renderServerFiles(files);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        let selectedServerFiles = new Set();
+
+        function renderServerFiles(files) {
+            const container = document.getElementById('serverFilesList');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+
+            if (files.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:20px; color:#666;">Brak plików na serwerze</div>';
+                analyzeBtn.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = files.map(file => {
+                const isSelected = selectedServerFiles.has(file.id);
+                const statusColor = file.status === 'uploaded' ? '#ffd54f' : '#00e6a0';
+                const statusText = file.status === 'uploaded' ? 'Do analizy' : 'Przeanalizowany';
+
+                return `
+                <div class="file-item ${isSelected ? 'selected' : ''}" style="border-left: 3px solid ${statusColor}">
+                    <input type="checkbox" 
+                           onchange="toggleServerFile(${file.id})" 
+                           ${isSelected ? 'checked' : ''}
+                           style="width:20px; margin-right:10px;">
+                    <div class="file-icon">📁</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.filename}</div>
+                        <div class="file-size">
+                            ${formatSize(file.size)} • 
+                            <span style="color:${statusColor}">${statusText}</span> • 
+                            ${new Date(file.uploaded_at).toLocaleString()}
+                        </div>
+                    </div>
+                    <button class="file-remove" onclick="deleteServerFile(${file.id})">🗑️</button>
+                </div>
+                `;
+            }).join('');
+
+            analyzeBtn.style.display = 'block';
+            updateAnalyzeBtn();
+        }
+
+        window.toggleServerFile = function (id) {
+            if (selectedServerFiles.has(id)) selectedServerFiles.delete(id);
+            else selectedServerFiles.add(id);
+            updateAnalyzeBtn(); // Just update button state, don't re-render list to keep UX smooth
+        }
+
+        window.deleteServerFile = async function (id) {
+            if (!confirm('Czy na pewno chcesz usunąć ten plik?')) return;
+            try {
+                await fetch(`/admin/files/${id}`, { method: 'DELETE' });
+                selectedServerFiles.delete(id);
+                loadServerFiles();
+            } catch (err) { alert('Błąd usuwania'); }
+        }
+
+        function updateAnalyzeBtn() {
+            const btn = document.getElementById('analyzeBtn');
+            const count = selectedServerFiles.size;
+            btn.innerHTML = `<span>🤖</span><span>Analizuj zaznaczone (${count})</span>`;
+            btn.disabled = count === 0;
+        }
+
+        // Analyze Action
+        document.getElementById('analyzeBtn').addEventListener('click', async () => {
+            const password = document.getElementById('password').value;
+            const rok = document.getElementById('rok').value;
+            const tydzien = document.getElementById('tydzien').value;
+
+            if (!password) { alert('Wprowadź hasło'); return; }
+            if (selectedServerFiles.size === 0) return;
+
+            const btn = document.getElementById('analyzeBtn');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Analizowanie... (to może potrwać chwiłę)';
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').innerHTML = '';
+
+            try {
+                const res = await fetch('/admin/analyze-files', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        password,
+                        rok,
+                        tydzien,
+                        fileIds: Array.from(selectedServerFiles)
+                    })
+                });
+
+                const result = await res.json();
+                document.getElementById('loading').classList.remove('active');
+
+                if (res.ok) {
+                    renderResult(result);
+                    loadServerFiles(); // Refresh status
+                    loadHistory();
+                } else {
+                    renderError(result.error);
+                }
+            } catch (err) {
+                document.getElementById('loading').classList.remove('active');
+                renderError(err.message);
+            } finally {
+                updateAnalyzeBtn();
+            }
+        });
+
         function formatSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
-        
-        // Upload
-        uploadBtn.addEventListener('click', async () => {
-            const password = document.getElementById('password').value;
-            const rok = document.getElementById('rok').value;
-            const tydzien = document.getElementById('tydzien').value;
-            
-            if (!password) {
-                alert('Wprowadź hasło');
-                return;
-            }
-            
-            if (selectedFiles.length === 0) {
-                alert('Wybierz pliki do importu');
-                return;
-            }
-            
-            // Show loading
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('result').innerHTML = '';
-            uploadBtn.disabled = true;
-            
-            const formData = new FormData();
-            formData.append('password', password);
-            formData.append('rok', rok);
-            formData.append('tydzien', tydzien);
-            
-            selectedFiles.forEach(file => {
-                formData.append('files', file);
-            });
-            
-            try {
-                const response = await fetch('/admin/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                const result = await response.json();
-                
-                document.getElementById('loading').classList.remove('active');
-                
-                if (response.ok) {
-                    renderResult(result);
-                    selectedFiles = [];
-                    renderFileList();
-                    loadHistory();
-                } else {
-                    renderError(result.error);
-                }
-                
-            } catch (err) {
-                document.getElementById('loading').classList.remove('active');
-                renderError('Błąd połączenia: ' + err.message);
-            }
-            
-            uploadBtn.disabled = selectedFiles.length === 0;
-        });
-        
+
+        // ... (renderResult, renderError, formatAnalysis, loadHistory same as before) ...
+
         function renderResult(result) {
             let html = `
                 <div class="result-card">
@@ -594,7 +730,7 @@
                     <div class="result-summary">${result.summary || ''}</div>
                     <div class="result-details">
             `;
-            
+
             if (result.details && result.details.length > 0) {
                 result.details.forEach(d => {
                     html += `
@@ -605,9 +741,9 @@
                     `;
                 });
             }
-            
+
             html += '</div>';
-            
+
             if (result.warnings && result.warnings.length > 0) {
                 html += `
                     <div class="warnings">
@@ -616,7 +752,7 @@
                     </div>
                 `;
             }
-            
+
             if (result.analysis) {
                 html += `
                     <div class="analysis-preview">
@@ -625,12 +761,12 @@
                     </div>
                 `;
             }
-            
+
             html += '</div>';
-            
+
             document.getElementById('result').innerHTML = html;
         }
-        
+
         function renderError(error) {
             document.getElementById('result').innerHTML = `
                 <div class="result-card error">
@@ -639,7 +775,7 @@
                 </div>
             `;
         }
-        
+
         function formatAnalysis(text) {
             return text
                 .replace(/## /g, '<h2>')
@@ -647,38 +783,40 @@
                 .replace(/\n- /g, '<br>• ')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         }
-        
-        // Load history
+
         async function loadHistory() {
             try {
                 const response = await fetch('/admin/history');
                 const history = await response.json();
-                
+
                 if (history.length === 0) {
                     document.getElementById('history').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak importów</div>';
                     return;
                 }
-                
+
                 document.getElementById('history').innerHTML = history.slice(0, 10).map(h => {
-                    const date = new Date(h.created_at);
+                    const date = new Date(h.created_at || h.imported_at);
                     return `
                         <div class="history-item">
                             <div>📥</div>
                             <div class="history-info">
                                 <div class="history-files">${h.filename}</div>
-                                <div class="history-count">${h.records_imported} rekordów • ${h.detected_type}</div>
+                                <div class="history-count">${h.records_imported || 0} rekordów • ${h.detected_type || 'auto'}</div>
                             </div>
-                            <div class="history-date">${date.toLocaleDateString('pl-PL')} ${date.toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}</div>
+                            <div class="history-date">${date.toLocaleDateString('pl-PL')} ${date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
                     `;
                 }).join('');
-                
+
             } catch (err) {
                 document.getElementById('history').innerHTML = '<div style="color:#ff6b6b;">Błąd ładowania historii</div>';
             }
         }
-        
+
+        // Initial load
         loadHistory();
+        loadServerFiles();
     </script>
 </body>
+
 </html>

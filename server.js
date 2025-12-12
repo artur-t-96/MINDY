@@ -619,9 +619,35 @@ app.get('/api/dashboard', (req, res) => {
     const tydzien = parseInt(req.query.tydzien) || getWeekNumber(new Date());
 
     const weekData = getCurrentWeekData(rok, tydzien);
+
+    // SORTING LOGIC: Placements > Rekomendacje > (CV + Weryfikacje)
+    weekData.rekrutacja.sort((a, b) => {
+        if (b.placements !== a.placements) return b.placements - a.placements;
+        if (b.rekomendacje !== a.rekomendacje) return b.rekomendacje - a.rekomendacje;
+        const scoreA = (a.cv_dodane || 0) + (a.weryfikacje || 0);
+        const scoreB = (b.cv_dodane || 0) + (b.weryfikacje || 0);
+        return scoreB - scoreA;
+    });
+
     const avgData = getAverageData();
     const targets = getTargets();
     const weeks = getAvailableWeeks();
+
+    // Calculate Team Counts for dynamic targets
+    const teamCounts = {
+        sourcer: weekData.rekrutacja.filter(p => p.stanowisko.toLowerCase().includes('sourc')).length || 1,
+        rekruter: weekData.rekrutacja.filter(p => p.stanowisko.toLowerCase().includes('rekrut')).length || 1,
+        sdr: weekData.sprzedaz.filter(p => p.stanowisko.toLowerCase().includes('sdr')).length || 1,
+        bdm: weekData.sprzedaz.filter(p => p.stanowisko.toLowerCase().includes('bdm')).length || 1
+    };
+    // Safe minimum 1 to avoid division by zero or weird logic if needed, 
+    // but for multiplication 0 is fine if no one exists. 
+    // Actually for targets, if we have 0 people, target should be 0.
+    // Let's use actual counts.
+    teamCounts.sourcer = weekData.rekrutacja.filter(p => p.stanowisko.toLowerCase().includes('sourc')).length;
+    teamCounts.rekruter = weekData.rekrutacja.filter(p => p.stanowisko.toLowerCase().includes('rekrut')).length;
+    teamCounts.sdr = weekData.sprzedaz.filter(p => p.stanowisko.toLowerCase().includes('sdr')).length;
+    teamCounts.bdm = weekData.sprzedaz.filter(p => p.stanowisko.toLowerCase().includes('bdm')).length;
 
     const latestAnalysis = db.prepare(`
         SELECT a.tresc, a.created_at 
@@ -637,6 +663,7 @@ app.get('/api/dashboard', (req, res) => {
         average: avgData,
         targets,
         weeks,
+        teamCounts,
         analysis: latestAnalysis?.tresc || null
     });
 });
@@ -651,6 +678,64 @@ app.post('/api/analyze', async (req, res) => {
     db.prepare('INSERT INTO analizy (tydzien_id, tresc) VALUES (?, ?)').run(tydzienId, analysis);
 
     res.json({ analysis });
+});
+
+app.post('/api/analyze-department', async (req, res) => {
+    if (!ANTHROPIC_API_KEY) {
+        return res.json({ analysis: "To use this feature, add ANTHROPIC_API_KEY to .env" });
+    }
+
+    const { department, score, kpis, rok, tydzien } = req.body;
+
+    // Construct prompt
+    const context = `
+    KONTEKST:
+    - Firma: InfraMinds
+    - Dział: ${department === 'mindy' ? 'Rekrutacja (MINDY)' : 'Sprzedaż (INFRON)'}
+    - Wynik ogólny: ${score}%
+    - Okres: Tydzień ${tydzien}/${rok}
+    
+    SZCZEGÓŁY KPI:
+    ${kpis.map(k => `- ${k.name}: ${k.value}/${k.target} (${k.percent}%)`).join('\n')}
+    `;
+
+    const prompt = `Jesteś doświadczonym managerem ${department === 'mindy' ? 'HR' : 'Sprzedaży'}.
+    Twój zespół osiągnął wynik ${score}%. 
+    
+    ${context}
+    
+    Zanalizuj te wyniki i podaj 3 konkretne, motywujące porady co zrobić w tym tygodniu, żeby poprawić wynik.
+    Jeśli wynik jest niski (<70%), bądź wspierający ale stanowczy.
+    Jeśli wysoki (>100%), pogratuluj i zasugeruj jak to utrzymać.
+    
+    Odpowiedź sformatuj w HTML (użyj <ul>, <li>, <strong>). Nie dodawaj nagłówków h1-h2, tylko samą treść porad.
+    Maksymalnie 150 słów.`;
+
+    try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': ANTHROPIC_API_KEY,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-sonnet-4-20250514',
+                max_tokens: 500,
+                messages: [{ role: 'user', content: prompt }]
+            })
+        });
+
+        const result = await response.json();
+        if (result.content && result.content[0]) {
+            res.json({ analysis: result.content[0].text });
+        } else {
+            res.status(500).json({ error: 'Błąd AI' });
+        }
+    } catch (err) {
+        console.error('Dept Analysis Error:', err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('/admin', (req, res) => {
