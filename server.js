@@ -115,6 +115,10 @@ db.exec(`
     );
 `);
 
+// ============ MIGRATIONS ============
+try { db.prepare("ALTER TABLE import_log ADD COLUMN rok INTEGER").run(); } catch (e) { }
+try { db.prepare("ALTER TABLE import_log ADD COLUMN tydzien INTEGER").run(); } catch (e) { }
+
 // Default targets (per person!)
 const targetCount = db.prepare('SELECT COUNT(*) as cnt FROM targety').get();
 if (targetCount.cnt === 0) {
@@ -150,7 +154,7 @@ function getOrCreateOsoba(imie, stanowisko, dzial) {
     const stanLower = stanowisko.toLowerCase();
     let normalizedStan = stanowisko;
     let normalizedDzial = dzial;
-    
+
     if (stanLower.includes('sourc')) normalizedStan = 'Sourcer';
     else if (stanLower.includes('rekrut') || stanLower.includes('recruit')) normalizedStan = 'Rekruter';
     else if (stanLower.includes('tac')) normalizedStan = 'TAC';
@@ -158,7 +162,7 @@ function getOrCreateOsoba(imie, stanowisko, dzial) {
     else if (stanLower.includes('sdr')) { normalizedStan = 'SDR'; normalizedDzial = 'sprzedaz'; }
     else if (stanLower.includes('bdm')) { normalizedStan = 'BDM'; normalizedDzial = 'sprzedaz'; }
     else if (stanLower.includes('head') || stanLower.includes('hot')) { normalizedStan = 'Head of Technology'; normalizedDzial = 'sprzedaz'; }
-    
+
     let row = db.prepare('SELECT id FROM osoby WHERE imie = ? AND stanowisko = ?').get(imie, normalizedStan);
     if (!row) {
         const info = db.prepare('INSERT OR IGNORE INTO osoby (imie, stanowisko, dzial) VALUES (?, ?, ?)').run(imie, normalizedStan, normalizedDzial);
@@ -206,23 +210,23 @@ function getTargets() {
 function getCurrentWeekData(rok, tydzien) {
     const tydzienRow = db.prepare('SELECT id FROM tygodnie WHERE rok = ? AND tydzien = ?').get(rok, tydzien);
     if (!tydzienRow) return { rekrutacja: [], sprzedaz: [], hitRatio: [] };
-    
+
     const tydzienId = tydzienRow.id;
-    
+
     const rekrutacja = db.prepare(`
         SELECT o.imie, o.stanowisko, k.dni_pracy, k.weryfikacje, k.rekomendacje, k.cv_dodane, k.placements
         FROM kpi_rekrutacja k
         JOIN osoby o ON k.osoba_id = o.id
         WHERE k.tydzien_id = ?
     `).all(tydzienId);
-    
+
     const sprzedaz = db.prepare(`
         SELECT o.imie, o.stanowisko, k.dni_pracy, k.leady, k.oferty, k.mrr, k.placements
         FROM kpi_sprzedaz k
         JOIN osoby o ON k.osoba_id = o.id
         WHERE k.tydzien_id = ?
     `).all(tydzienId);
-    
+
     const miesiac = Math.ceil(tydzien / 4.33);
     const hitRatio = db.prepare(`
         SELECT o.imie, h.zamkniete_requesty, h.placements, h.hit_ratio
@@ -230,7 +234,7 @@ function getCurrentWeekData(rok, tydzien) {
         JOIN osoby o ON h.osoba_id = o.id
         WHERE h.rok = ? AND h.miesiac = ?
     `).all(rok, miesiac);
-    
+
     return { rekrutacja, sprzedaz, hitRatio };
 }
 
@@ -253,7 +257,7 @@ function getAverageData() {
         GROUP BY o.id
         ORDER BY total_placements DESC, reco_per_day DESC, cv_per_day + weryf_per_day DESC
     `).all();
-    
+
     const sprzedaz = db.prepare(`
         SELECT o.imie, o.stanowisko,
             SUM(k.dni_pracy) as total_dni,
@@ -270,7 +274,7 @@ function getAverageData() {
         GROUP BY o.id
         ORDER BY mrr_per_week DESC, oferty_per_day DESC, leady_per_day DESC
     `).all();
-    
+
     return { rekrutacja, sprzedaz };
 }
 
@@ -287,19 +291,19 @@ function calculateTeamTargets(data, targets) {
         TAC: data.rekrutacja.filter(r => r.stanowisko === 'TAC').length,
         total: data.rekrutacja.length
     };
-    
+
     const sprzedazCount = {
         SDR: data.sprzedaz.filter(r => r.stanowisko === 'SDR').length,
         BDM: data.sprzedaz.filter(r => r.stanowisko === 'BDM').length,
         'Head of Technology': data.sprzedaz.filter(r => r.stanowisko === 'Head of Technology').length,
         total: data.sprzedaz.length
     };
-    
+
     const getTarget = (kpi) => {
         const t = targets.find(t => t.kpi === kpi);
         return t ? t.wartosc : 0;
     };
-    
+
     return {
         rekrutacja: {
             weryfikacje: rekrutacjaCount.Sourcer * getTarget('weryfikacje'),
@@ -324,12 +328,12 @@ async function analyzeExcelWithAI(filesData) {
     if (!ANTHROPIC_API_KEY) {
         return { error: 'Brak klucza API. Dodaj ANTHROPIC_API_KEY.' };
     }
-    
+
     let filesContext = '';
     filesData.forEach(({ filename, data }) => {
         filesContext += excelDataToText(data, filename) + '\n---\n\n';
     });
-    
+
     const prompt = `Przeanalizuj pliki Excel i wyciągnij dane KPI dla firmy rekrutacyjnej InfraMinds.
 
 WAŻNE: Pliki mogą zawierać dane za WIELE tygodni/miesięcy. Musisz rozpoznać:
@@ -397,16 +401,46 @@ WAŻNE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 4000,
+                model: 'claude-3-5-sonnet-20240620', // Changed model to latest Sonnet 3.5 which supports output tokens
+                max_tokens: 8192,
                 messages: [{ role: 'user', content: prompt }]
             })
         });
 
         const result = await response.json();
         if (result.content && result.content[0]) {
-            const jsonMatch = result.content[0].text.match(/\{[\s\S]*\}/);
-            if (jsonMatch) return JSON.parse(jsonMatch[0]);
+            let jsonText = result.content[0].text;
+            const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+
+            if (jsonMatch) {
+                jsonText = jsonMatch[0];
+                try {
+                    return JSON.parse(jsonText);
+                } catch (parseErr) {
+                    console.log("JSON Parse Error. Attempting repair...");
+                    // Simple repair: try to find the last valid closing sequence or just append closing braces
+                    // This is a naive heuristic but often helps with truncated arrays
+
+                    // 1. Try to cut off at the last closing brace of an object or array in case there is garbage at the end
+                    const lastBrace = jsonText.lastIndexOf('}');
+                    const lastBracket = jsonText.lastIndexOf(']');
+                    const lastValidChar = Math.max(lastBrace, lastBracket);
+
+                    if (lastValidChar !== -1) {
+                        try {
+                            return JSON.parse(jsonText.substring(0, lastValidChar + 1));
+                        } catch (e) { /* ignore */ }
+                    }
+
+                    // 2. If it looks like a cut-off array inside the object
+                    // We can't easily auto-repair complex nested truncated JSON without a library like 'json-repair'
+                    // but we can log it to help debugging
+                    console.error("Failed JSON text:", jsonText);
+
+                    // Return what we can or error
+                    return { error: 'Otrzymano niepełne dane od AI (JSON Error). Spróbuj wgrać mniej plików naraz.', details: parseErr.message };
+                }
+            }
         }
         return { error: 'Nie udało się przeanalizować odpowiedzi' };
     } catch (err) {
@@ -418,34 +452,34 @@ async function generateDepartmentHelp(dzial, rok, tydzien) {
     if (!ANTHROPIC_API_KEY) {
         return { error: 'Brak klucza API' };
     }
-    
+
     const weekData = getCurrentWeekData(rok, tydzien);
     const targets = getTargets();
     const teamTargets = calculateTeamTargets(weekData, targets);
-    
+
     let context = '';
-    
+
     if (dzial === 'rekrutacja') {
         const data = weekData.rekrutacja;
         const tt = teamTargets.rekrutacja;
-        
+
         const totals = {
             weryfikacje: data.reduce((s, r) => s + (r.weryfikacje || 0), 0),
             rekomendacje: data.reduce((s, r) => s + (r.rekomendacje || 0), 0),
             cv_dodane: data.reduce((s, r) => s + (r.cv_dodane || 0), 0),
             placements: data.reduce((s, r) => s + (r.placements || 0), 0)
         };
-        
+
         context = `DZIAŁ REKRUTACJI (MINDY) - Tydzień ${tydzien}/${rok}
 
 ZESPÓŁ (${data.length} osób):
 ${data.map(r => `- ${r.imie} (${r.stanowisko}): ${r.dni_pracy}dni, Weryf:${r.weryfikacje}, Reco:${r.rekomendacje}, CV:${r.cv_dodane}, Placements:${r.placements}`).join('\n')}
 
 SUMY vs TARGETY ZESPOŁOWE:
-- Weryfikacje: ${totals.weryfikacje} / ${tt.weryfikacje} (${tt.weryfikacje > 0 ? Math.round(totals.weryfikacje/tt.weryfikacje*100) : 0}%)
-- Rekomendacje: ${totals.rekomendacje} / ${tt.rekomendacje} (${tt.rekomendacje > 0 ? Math.round(totals.rekomendacje/tt.rekomendacje*100) : 0}%)
-- CV do bazy: ${totals.cv_dodane} / ${tt.cv_dodane} (${tt.cv_dodane > 0 ? Math.round(totals.cv_dodane/tt.cv_dodane*100) : 0}%)
-- Placements: ${totals.placements} / ${tt.placements.toFixed(1)} (${tt.placements > 0 ? Math.round(totals.placements/tt.placements*100) : 0}%)
+- Weryfikacje: ${totals.weryfikacje} / ${tt.weryfikacje} (${tt.weryfikacje > 0 ? Math.round(totals.weryfikacje / tt.weryfikacje * 100) : 0}%)
+- Rekomendacje: ${totals.rekomendacje} / ${tt.rekomendacje} (${tt.rekomendacje > 0 ? Math.round(totals.rekomendacje / tt.rekomendacje * 100) : 0}%)
+- CV do bazy: ${totals.cv_dodane} / ${tt.cv_dodane} (${tt.cv_dodane > 0 ? Math.round(totals.cv_dodane / tt.cv_dodane * 100) : 0}%)
+- Placements: ${totals.placements} / ${tt.placements.toFixed(1)} (${tt.placements > 0 ? Math.round(totals.placements / tt.placements * 100) : 0}%)
 
 HIT RATIO (Delivery Leads):
 ${weekData.hitRatio.map(h => `- ${h.imie}: ${h.hit_ratio}% (${h.placements}/${h.zamkniete_requesty})`).join('\n') || 'Brak danych'}`;
@@ -453,24 +487,24 @@ ${weekData.hitRatio.map(h => `- ${h.imie}: ${h.hit_ratio}% (${h.placements}/${h.
     } else {
         const data = weekData.sprzedaz;
         const tt = teamTargets.sprzedaz;
-        
+
         const totals = {
             leady: data.reduce((s, r) => s + (r.leady || 0), 0),
             oferty: data.reduce((s, r) => s + (r.oferty || 0), 0),
             mrr: data.reduce((s, r) => s + (r.mrr || 0), 0),
             placements: data.reduce((s, r) => s + (r.placements || 0), 0)
         };
-        
+
         context = `DZIAŁ SPRZEDAŻY (INFRON) - Tydzień ${tydzien}/${rok}
 
 ZESPÓŁ (${data.length} osób):
 ${data.map(r => `- ${r.imie} (${r.stanowisko}): ${r.dni_pracy}dni, Leady:${r.leady}, Oferty:${r.oferty}, MRR:${r.mrr}zł, Placements:${r.placements}`).join('\n')}
 
 SUMY vs TARGETY ZESPOŁOWE:
-- Leady: ${totals.leady} / ${tt.leady} (${tt.leady > 0 ? Math.round(totals.leady/tt.leady*100) : 0}%)
-- Oferty: ${totals.oferty} / ${tt.oferty} (${tt.oferty > 0 ? Math.round(totals.oferty/tt.oferty*100) : 0}%)
-- MRR: ${totals.mrr}zł / ${tt.mrr}zł (${tt.mrr > 0 ? Math.round(totals.mrr/tt.mrr*100) : 0}%)
-- Placements: ${totals.placements} / ${tt.placements.toFixed(1)} (${tt.placements > 0 ? Math.round(totals.placements/tt.placements*100) : 0}%)`;
+- Leady: ${totals.leady} / ${tt.leady} (${tt.leady > 0 ? Math.round(totals.leady / tt.leady * 100) : 0}%)
+- Oferty: ${totals.oferty} / ${tt.oferty} (${tt.oferty > 0 ? Math.round(totals.oferty / tt.oferty * 100) : 0}%)
+- MRR: ${totals.mrr}zł / ${tt.mrr}zł (${tt.mrr > 0 ? Math.round(totals.mrr / tt.mrr * 100) : 0}%)
+- Placements: ${totals.placements} / ${tt.placements.toFixed(1)} (${tt.placements > 0 ? Math.round(totals.placements / tt.placements * 100) : 0}%)`;
     }
 
     try {
@@ -515,13 +549,13 @@ async function generateFullAnalysis(rok, tydzien) {
     if (!ANTHROPIC_API_KEY) {
         return 'Brak klucza API. Dodaj ANTHROPIC_API_KEY aby włączyć analizę AI.';
     }
-    
+
     const weekData = getCurrentWeekData(rok, tydzien);
     const targets = getTargets();
     const teamTargets = calculateTeamTargets(weekData, targets);
-    
+
     let context = `DANE TYGODNIA ${tydzien}/${rok}:\n\n`;
-    
+
     // Rekrutacja
     const rekTotals = {
         weryfikacje: weekData.rekrutacja.reduce((s, r) => s + (r.weryfikacje || 0), 0),
@@ -529,13 +563,13 @@ async function generateFullAnalysis(rok, tydzien) {
         cv_dodane: weekData.rekrutacja.reduce((s, r) => s + (r.cv_dodane || 0), 0),
         placements: weekData.rekrutacja.reduce((s, r) => s + (r.placements || 0), 0)
     };
-    
+
     context += `REKRUTACJA (${weekData.rekrutacja.length} osób):\n`;
     weekData.rekrutacja.forEach(r => {
         context += `- ${r.imie} (${r.stanowisko}): Weryf:${r.weryfikacje}, Reco:${r.rekomendacje}, CV:${r.cv_dodane}, Place:${r.placements}\n`;
     });
     context += `SUMY: Weryf:${rekTotals.weryfikacje}/${teamTargets.rekrutacja.weryfikacje}, Reco:${rekTotals.rekomendacje}/${teamTargets.rekrutacja.rekomendacje}, CV:${rekTotals.cv_dodane}/${teamTargets.rekrutacja.cv_dodane}, Place:${rekTotals.placements}/${teamTargets.rekrutacja.placements.toFixed(1)}\n\n`;
-    
+
     // Sprzedaż
     const salesTotals = {
         leady: weekData.sprzedaz.reduce((s, r) => s + (r.leady || 0), 0),
@@ -543,13 +577,13 @@ async function generateFullAnalysis(rok, tydzien) {
         mrr: weekData.sprzedaz.reduce((s, r) => s + (r.mrr || 0), 0),
         placements: weekData.sprzedaz.reduce((s, r) => s + (r.placements || 0), 0)
     };
-    
+
     context += `SPRZEDAŻ (${weekData.sprzedaz.length} osób):\n`;
     weekData.sprzedaz.forEach(s => {
         context += `- ${s.imie} (${s.stanowisko}): Leady:${s.leady}, Oferty:${s.oferty}, MRR:${s.mrr}zł, Place:${s.placements}\n`;
     });
     context += `SUMY: Leady:${salesTotals.leady}/${teamTargets.sprzedaz.leady}, Oferty:${salesTotals.oferty}/${teamTargets.sprzedaz.oferty}, MRR:${salesTotals.mrr}/${teamTargets.sprzedaz.mrr}zł, Place:${salesTotals.placements}/${teamTargets.sprzedaz.placements.toFixed(1)}\n\n`;
-    
+
     // Hit Ratio
     context += `HIT RATIO:\n`;
     weekData.hitRatio.forEach(h => {
@@ -600,7 +634,7 @@ Używaj emoji, bądź konkretny.`
     } catch (err) {
         console.error('Analysis error:', err);
     }
-    
+
     return 'Błąd generowania analizy.';
 }
 
@@ -608,23 +642,23 @@ function importAnalyzedData(analysisResult) {
     let totalImported = 0;
     const importDetails = [];
     const importedPeriods = new Set();
-    
+
     if (!analysisResult.detected_data) return { imported: 0, details: [], periods: [] };
-    
+
     analysisResult.detected_data.forEach(dataSet => {
         const type = dataSet.type;
         let imported = 0;
-        
+
         if (type === 'rekrutacja' && dataSet.records) {
             dataSet.records.forEach(record => {
                 if (!record.imie) return;
-                
+
                 const rok = record.rok || new Date().getFullYear();
                 const tydzien = record.tydzien || getWeekNumber(new Date());
                 const tydzienId = getOrCreateTydzien(rok, tydzien);
-                
+
                 const osobaId = getOrCreateOsoba(record.imie, record.stanowisko || 'Sourcer', 'rekrutacja');
-                
+
                 db.prepare(`
                     INSERT INTO kpi_rekrutacja (osoba_id, tydzien_id, dni_pracy, weryfikacje, rekomendacje, cv_dodane, placements)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -632,22 +666,22 @@ function importAnalyzedData(analysisResult) {
                         dni_pracy = excluded.dni_pracy, weryfikacje = excluded.weryfikacje,
                         rekomendacje = excluded.rekomendacje, cv_dodane = excluded.cv_dodane, placements = excluded.placements
                 `).run(osobaId, tydzienId, record.dni_pracy || 5, record.weryfikacje || 0, record.rekomendacje || 0, record.cv_dodane || 0, record.placements || 0);
-                
+
                 importedPeriods.add(`${rok}-${tydzien}`);
                 imported++;
             });
         }
-        
+
         if (type === 'sprzedaz' && dataSet.records) {
             dataSet.records.forEach(record => {
                 if (!record.imie) return;
-                
+
                 const rok = record.rok || new Date().getFullYear();
                 const tydzien = record.tydzien || getWeekNumber(new Date());
                 const tydzienId = getOrCreateTydzien(rok, tydzien);
-                
+
                 const osobaId = getOrCreateOsoba(record.imie, record.stanowisko || 'SDR', 'sprzedaz');
-                
+
                 db.prepare(`
                     INSERT INTO kpi_sprzedaz (osoba_id, tydzien_id, dni_pracy, leady, oferty, mrr, placements)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -655,57 +689,57 @@ function importAnalyzedData(analysisResult) {
                         dni_pracy = excluded.dni_pracy, leady = excluded.leady,
                         oferty = excluded.oferty, mrr = excluded.mrr, placements = excluded.placements
                 `).run(osobaId, tydzienId, record.dni_pracy || 5, record.leady || 0, record.oferty || 0, record.mrr || 0, record.placements || 0);
-                
+
                 importedPeriods.add(`${rok}-${tydzien}`);
                 imported++;
             });
         }
-        
+
         if (type === 'hit_ratio' && dataSet.records) {
             dataSet.records.forEach(record => {
                 if (!record.imie) return;
-                
+
                 const rok = record.rok || new Date().getFullYear();
                 const miesiac = record.miesiac || Math.ceil((record.tydzien || getWeekNumber(new Date())) / 4.33);
-                
+
                 const osobaId = getOrCreateOsoba(record.imie, 'Delivery Lead', 'rekrutacja');
-                const hitRatio = record.zamkniete_requesty > 0 
+                const hitRatio = record.zamkniete_requesty > 0
                     ? Math.round((record.placements || 0) / record.zamkniete_requesty * 100)
                     : record.hit_ratio || 0;
-                
+
                 db.prepare(`
                     INSERT INTO hit_ratio (osoba_id, rok, miesiac, zamkniete_requesty, placements, hit_ratio)
                     VALUES (?, ?, ?, ?, ?, ?)
                     ON CONFLICT(osoba_id, rok, miesiac) DO UPDATE SET
                         zamkniete_requesty = excluded.zamkniete_requesty, placements = excluded.placements, hit_ratio = excluded.hit_ratio
                 `).run(osobaId, rok, miesiac, record.zamkniete_requesty || 0, record.placements || 0, hitRatio);
-                
+
                 imported++;
             });
         }
-        
+
         if (type === 'prep_calls' && dataSet.records) {
             dataSet.records.forEach(record => {
                 if (!record.dl_imie) return;
                 const osobaId = getOrCreateOsoba(record.dl_imie, 'Delivery Lead', 'rekrutacja');
-                
+
                 db.prepare(`INSERT INTO prep_calls (osoba_id, data, kandydat, checklist_json) VALUES (?, ?, ?, ?)`
                 ).run(osobaId, record.data || new Date().toISOString().split('T')[0], record.kandydat || '', JSON.stringify(record.checklist || {}));
                 imported++;
             });
         }
-        
+
         if (imported > 0) {
             importDetails.push({ type, file: dataSet.source_file, count: imported });
         }
         totalImported += imported;
     });
-    
+
     const periods = Array.from(importedPeriods).map(p => {
         const [rok, tydzien] = p.split('-');
         return { rok: parseInt(rok), tydzien: parseInt(tydzien) };
     });
-    
+
     return { imported: totalImported, details: importDetails, periods };
 }
 
@@ -718,20 +752,20 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'adm
 app.get('/api/dashboard', (req, res) => {
     const rok = parseInt(req.query.rok) || new Date().getFullYear();
     const tydzien = parseInt(req.query.tydzien) || getWeekNumber(new Date());
-    
+
     const weekData = getCurrentWeekData(rok, tydzien);
     const avgData = getAverageData();
     const targets = getTargets();
     const weeks = getAvailableWeeks();
     const teamTargets = calculateTeamTargets(weekData, targets);
-    
+
     const latestAnalysis = db.prepare(`
         SELECT a.tresc, a.created_at FROM analizy a 
         JOIN tygodnie t ON a.tydzien_id = t.id 
         WHERE t.rok = ? AND t.tydzien = ? AND a.dzial IS NULL
         ORDER BY a.created_at DESC LIMIT 1
     `).get(rok, tydzien);
-    
+
     res.json({
         rok, tydzien,
         current: weekData,
@@ -748,42 +782,42 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
     if (req.body.password !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: 'Nieprawidłowe hasło' });
     }
-    
+
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'Brak plików' });
     }
-    
+
     try {
         const filesData = [];
         for (const file of req.files) {
             filesData.push({ filename: file.originalname, data: readExcelFile(file.path) });
         }
-        
+
         // Use AI to analyze structure (AI rozpozna okresy automatycznie)
         const analysisResult = await analyzeExcelWithAI(filesData);
-        
+
         if (analysisResult.error) {
             req.files.forEach(f => fs.unlinkSync(f.path));
             return res.status(400).json({ error: analysisResult.error });
         }
-        
+
         // Import data (każdy rekord ma swój rok/tydzien)
         const importResult = importAnalyzedData(analysisResult);
-        
+
         // Log
         const periodsStr = importResult.periods.map(p => `T${p.tydzien}/${p.rok}`).join(', ');
         db.prepare(`INSERT INTO import_log (rok, tydzien, filename, detected_type, records_imported, ai_summary) VALUES (?, ?, ?, ?, ?, ?)`
         ).run(
-            importResult.periods[0]?.rok || new Date().getFullYear(), 
-            importResult.periods[0]?.tydzien || getWeekNumber(new Date()), 
-            req.files.map(f => f.originalname).join(', '), 
+            importResult.periods[0]?.rok || new Date().getFullYear(),
+            importResult.periods[0]?.tydzien || getWeekNumber(new Date()),
+            req.files.map(f => f.originalname).join(', '),
             analysisResult.detected_data?.map(d => d.type).join(', ') || 'unknown',
-            importResult.imported, 
+            importResult.imported,
             `${analysisResult.summary || ''} Okresy: ${periodsStr}`
         );
-        
+
         req.files.forEach(f => fs.unlinkSync(f.path));
-        
+
         res.json({
             success: true,
             message: `Zaimportowano ${importResult.imported} rekordów`,
@@ -792,9 +826,9 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
             periods: importResult.periods,
             warnings: analysisResult.warnings || []
         });
-        
+
     } catch (err) {
-        req.files.forEach(f => { try { fs.unlinkSync(f.path); } catch(e) {} });
+        req.files.forEach(f => { try { fs.unlinkSync(f.path); } catch (e) { } });
         res.status(500).json({ error: err.message });
     }
 });
@@ -803,12 +837,12 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
 app.post('/api/analyze', async (req, res) => {
     const rok = parseInt(req.body.rok) || new Date().getFullYear();
     const tydzien = parseInt(req.body.tydzien) || getWeekNumber(new Date());
-    
+
     const analysis = await generateFullAnalysis(rok, tydzien);
-    
+
     const tydzienId = getOrCreateTydzien(rok, tydzien);
     db.prepare('INSERT INTO analizy (tydzien_id, tresc) VALUES (?, ?)').run(tydzienId, analysis);
-    
+
     res.json({ analysis });
 });
 
@@ -817,7 +851,7 @@ app.post('/api/help/:dzial', async (req, res) => {
     const dzial = req.params.dzial;
     const rok = parseInt(req.body.rok) || new Date().getFullYear();
     const tydzien = parseInt(req.body.tydzien) || getWeekNumber(new Date());
-    
+
     const result = await generateDepartmentHelp(dzial, rok, tydzien);
     res.json(result);
 });
@@ -827,24 +861,24 @@ app.delete('/admin/data/:rok/:tydzien', (req, res) => {
     if (req.query.password !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: 'Nieprawidłowe hasło' });
     }
-    
+
     const rok = parseInt(req.params.rok);
     const tydzien = parseInt(req.params.tydzien);
-    
+
     const tydzienRow = db.prepare('SELECT id FROM tygodnie WHERE rok = ? AND tydzien = ?').get(rok, tydzien);
     if (!tydzienRow) {
         return res.status(404).json({ error: 'Nie znaleziono danych' });
     }
-    
+
     const tydzienId = tydzienRow.id;
-    
+
     const rekDeleted = db.prepare('DELETE FROM kpi_rekrutacja WHERE tydzien_id = ?').run(tydzienId).changes;
     const salesDeleted = db.prepare('DELETE FROM kpi_sprzedaz WHERE tydzien_id = ?').run(tydzienId).changes;
     db.prepare('DELETE FROM analizy WHERE tydzien_id = ?').run(tydzienId);
-    
-    res.json({ 
-        success: true, 
-        message: `Usunięto ${rekDeleted + salesDeleted} rekordów z tygodnia ${tydzien}/${rok}` 
+
+    res.json({
+        success: true,
+        message: `Usunięto ${rekDeleted + salesDeleted} rekordów z tygodnia ${tydzien}/${rok}`
     });
 });
 
@@ -853,7 +887,7 @@ app.delete('/admin/import/:id', (req, res) => {
     if (req.query.password !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: 'Nieprawidłowe hasło' });
     }
-    
+
     db.prepare('DELETE FROM import_log WHERE id = ?').run(parseInt(req.params.id));
     res.json({ success: true });
 });
