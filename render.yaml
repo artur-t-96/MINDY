@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mindy-infron-dashboard
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.10.0
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
