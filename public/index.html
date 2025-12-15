@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraMinds Dashboard - MINDY & INFRON</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --mindy-primary: #4da6ff;
+            --mindy-secondary: #66b3ff;
+            --mindy-glow: rgba(77, 166, 255, 0.3);
+            --infron-primary: #ff8c42;
+            --infron-secondary: #ffaa66;
+            --infron-glow: rgba(255, 140, 66, 0.3);
+            --green: #00e6a0;
+            --yellow: #ffd54f;
+            --red: #ff6b6b;
+            --bg: #0a0b10;
+            --card: rgba(255,255,255,0.03);
+            --border: rgba(255,255,255,0.06);
+        }
+        
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+        }
+        
+        .bg-effects {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 60% 40% at 20% 20%, var(--mindy-glow), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 80%, var(--infron-glow), transparent);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        
+        .container {
+            position: relative;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--mindy-primary), #fff, var(--infron-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .week-selector {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 8px 16px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .week-selector select {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .week-selector select option { background: #1a1b20; }
+        
+        /* Robots Grid */
+        .robots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1000px) {
+            .robots-grid { grid-template-columns: 1fr; }
+        }
+        
+        .robot-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+        
+        .robot-card.mindy { border-top: 3px solid var(--mindy-primary); }
+        .robot-card.infron { border-top: 3px solid var(--infron-primary); }
+        
+        .robot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        
+        .robot-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .robot-title.mindy { color: var(--mindy-primary); }
+        .robot-title.infron { color: var(--infron-primary); }
+        
+        .robot-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .robot-score {
+            text-align: right;
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        
+        .score-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .robot-body {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        
+        .robot-svg-wrap {
+            flex: 0 0 180px;
+            position: relative;
+        }
+        
+        .robot-mood {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 8px;
+        }
+        
+        .robot-kpis {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .kpi-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .kpi-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        
+        .kpi-info { flex: 1; }
+        .kpi-name { font-size: 0.75rem; color: #888; }
+        .kpi-value { font-size: 1.1rem; font-weight: 600; margin-top: 2px; }
+        
+        .kpi-bar {
+            width: 70px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .kpi-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+        
+        .kpi-percent {
+            width: 45px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Help Button */
+        .help-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #888;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .help-btn:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+        
+        .help-btn.mindy:hover { border-color: var(--mindy-primary); }
+        .help-btn.infron:hover { border-color: var(--infron-primary); }
+        
+        .help-btn.loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        
+        /* Help Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: #12131a;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .modal-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ccc;
+        }
+        
+        /* AI Analysis */
+        .analysis-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+            margin-bottom: 30px;
+        }
+        
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .analysis-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analysis-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--mindy-primary), var(--infron-primary));
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .analysis-btn:hover { opacity: 0.9; }
+        .analysis-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .analysis-cost {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 4px;
+            text-align: right;
+        }
+        
+        .analysis-content {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #ccc;
+        }
+        
+        .analysis-content h2 {
+            font-size: 1rem;
+            color: #fff;
+            margin: 16px 0 8px;
+        }
+        
+        .analysis-content h2:first-child { margin-top: 0; }
+        
+        .analysis-empty {
+            text-align: center;
+            padding: 30px;
+            color: #555;
+        }
+        
+        /* Tables */
+        .tables-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .tables-section { grid-template-columns: 1fr; }
+        }
+        
+        .table-card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+        
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .table-subtitle {
+            font-size: 0.75rem;
+            color: #666;
+            font-weight: normal;
+            margin-left: auto;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 10px 8px;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        
+        .data-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+        
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #a66628); color: #fff; }
+        .rank-other { background: rgba(255,255,255,0.1); color: #888; }
+        
+        .stanowisko-badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.05);
+            color: #888;
+        }
+        
+        .placement-cell {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .placement-cell.has-placement { color: var(--green); }
+        .placement-cell.no-placement { color: #444; }
+        
+        .status-good { color: var(--green); }
+        .status-warning { color: var(--yellow); }
+        .status-bad { color: var(--red); }
+        
+        /* Averages */
+        .averages-bar {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+        
+        .avg-item { text-align: center; }
+        .avg-label { font-size: 0.75rem; color: #666; margin-bottom: 4px; }
+        .avg-value { font-size: 1.1rem; font-weight: 600; }
+        .avg-unit { font-size: 0.75rem; color: #888; }
+        
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            color: #333;
+            font-size: 0.75rem;
+        }
+        
+        footer a { color: #555; }
+        
+        /* Robot SVG */
+        .robot-svg { width: 100%; max-width: 180px; }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .robot-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes happy-bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
+        }
+        
+        .robot-happy { animation: happy-bounce 1s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">INFRAMINDS</div>
+            <div class="week-selector">
+                <span>📅</span>
+                <select id="weekSelect"><option>Ładowanie...</option></select>
+            </div>
+        </header>
+        
+        <!-- Robots -->
+        <div class="robots-grid">
+            <!-- MINDY -->
+            <div class="robot-card mindy">
+                <div class="robot-header">
+                    <div>
+                        <div class="robot-title mindy">🤖 MINDY</div>
+                        <div class="robot-subtitle">Rekrutacja • <span id="mindy-team-count">0</span> osób</div>
+                    </div>
+                    <div class="robot-score">
+                        <div class="score-value" id="mindy-score">--%</div>
+                        <div class="score-label">Ogólny wynik</div>
+                    </div>
+                </div>
+                <div class="robot-body">
+                    <div class="robot-svg-wrap">
+                        <svg class="robot-svg" id="mindy-robot" viewBox="0 0 200 320"></svg>
+                        <div class="robot-mood" id="mindy-mood">Czekam na dane...</div>
+                    </div>
+                    <div class="robot-kpis" id="mindy-kpis"></div>
+                </div>
+                <button class="help-btn mindy" onclick="askForHelp('rekrutacja')">
+                    <span>💬</span> Jak mogę pomóc?
+                </button>
+            </div>
+            
+            <!-- INFRON -->
+            <div class="robot-card infron">
+                <div class="robot-header">
+                    <div>
+                        <div class="robot-title infron">🤖 INFRON</div>
+                        <div class="robot-subtitle">Sprzedaż • <span id="infron-team-count">0</span> osób</div>
+                    </div>
+                    <div class="robot-score">
+                        <div class="score-value" id="infron-score">--%</div>
+                        <div class="score-label">Ogólny wynik</div>
+                    </div>
+                </div>
+                <div class="robot-body">
+                    <div class="robot-svg-wrap">
+                        <svg class="robot-svg" id="infron-robot" viewBox="0 0 200 320"></svg>
+                        <div class="robot-mood" id="infron-mood">Czekam na dane...</div>
+                    </div>
+                    <div class="robot-kpis" id="infron-kpis"></div>
+                </div>
+                <button class="help-btn infron" onclick="askForHelp('sprzedaz')">
+                    <span>💬</span> Jak mogę pomóc?
+                </button>
+            </div>
+        </div>
+        
+        <!-- AI Analysis -->
+        <div class="analysis-card">
+            <div class="analysis-header">
+                <div class="analysis-title">
+                    <span>📊</span> Analiza AI
+                </div>
+                <div>
+                    <button class="analysis-btn" id="analyzeBtn" onclick="generateAnalysis()">
+                        <span>🤖</span> Generuj analizę
+                    </button>
+                    <div class="analysis-cost">Używa API kredytów</div>
+                </div>
+            </div>
+            <div class="analysis-content" id="analysis-content">
+                <div class="analysis-empty">Kliknij "Generuj analizę" aby otrzymać AI analizę danych</div>
+            </div>
+        </div>
+        
+        <!-- Tables - Weekly -->
+        <div class="tables-section">
+            <div class="table-card">
+                <div class="table-title" style="color: var(--mindy-primary);">
+                    👥 Rekrutacja — Tydzień <span id="week-label-rek"></span>
+                    <span class="table-subtitle">Sort: Placements → Reco → CV/Weryf</span>
+                </div>
+                <table class="data-table" id="table-rekrutacja">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Imię</th>
+                            <th>Rola</th>
+                            <th>🏆</th>
+                            <th>Reco</th>
+                            <th>CV</th>
+                            <th>Weryf</th>
+                            <th>Dni</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="table-card">
+                <div class="table-title" style="color: var(--infron-primary);">
+                    💼 Sprzedaż — Tydzień <span id="week-label-sales"></span>
+                    <span class="table-subtitle">Sort: MRR → Oferty → Leady</span>
+                </div>
+                <table class="data-table" id="table-sprzedaz">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Imię</th>
+                            <th>Rola</th>
+                            <th>💎 MRR</th>
+                            <th>Oferty</th>
+                            <th>Leady</th>
+                            <th>Dni</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Tables - Average (per working day) -->
+        <div class="tables-section">
+            <div class="table-card" style="border-top: 2px solid #9966ff;">
+                <div class="table-title" style="color: #9966ff;">
+                    📊 Rekrutacja — Ranking Average (per dzień roboczy)
+                    <span class="table-subtitle">Historyczne średnie</span>
+                </div>
+                <table class="data-table" id="table-rekrutacja-avg">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Imię</th>
+                            <th>Rola</th>
+                            <th>🏆 Total</th>
+                            <th>Reco/d</th>
+                            <th>CV/d</th>
+                            <th>Weryf/d</th>
+                            <th>Tyg.</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            
+            <div class="table-card" style="border-top: 2px solid #9966ff;">
+                <div class="table-title" style="color: #9966ff;">
+                    📊 Sprzedaż — Ranking Average (per tydzień)
+                    <span class="table-subtitle">Historyczne średnie</span>
+                </div>
+                <table class="data-table" id="table-sprzedaz-avg">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Imię</th>
+                            <th>Rola</th>
+                            <th>💎 MRR/tyg</th>
+                            <th>Oferty/d</th>
+                            <th>Leady/d</th>
+                            <th>Tyg.</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Hit Ratio -->
+        <div class="table-card" style="margin-bottom: 30px;">
+            <div class="table-title" style="color: var(--green);">
+                🎯 Delivery Leads - Hit Ratio
+            </div>
+            <table class="data-table" id="table-hitratio">
+                <thead>
+                    <tr>
+                        <th>DL</th>
+                        <th>Placements</th>
+                        <th>Zamkn. Req.</th>
+                        <th>Hit Ratio</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <!-- Averages -->
+        <div class="averages-bar" id="averages-bar">
+            <div class="avg-item">
+                <div class="avg-label">Śr. Placements /mies</div>
+                <div class="avg-value" id="avg-placements">--</div>
+            </div>
+            <div class="avg-item">
+                <div class="avg-label">Śr. Reco /tydz</div>
+                <div class="avg-value" id="avg-reco">--</div>
+            </div>
+            <div class="avg-item">
+                <div class="avg-label">Śr. CV /tydz</div>
+                <div class="avg-value" id="avg-cv">--</div>
+            </div>
+            <div class="avg-item">
+                <div class="avg-label">Śr. MRR /tydz</div>
+                <div class="avg-value" id="avg-mrr">--<span class="avg-unit"> zł</span></div>
+            </div>
+        </div>
+        
+        <footer>
+            MINDY & INFRON © InfraMinds 2025 | <a href="/admin">Panel Admin</a>
+        </footer>
+    </div>
+    
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-title" id="modalTitle">💬 Pomoc</div>
+            <div class="modal-content" id="modalContent">Ładowanie...</div>
+        </div>
+    </div>
+
+    <script>
+        let dashboardData = null;
+        
+        const MOODS = {
+            ecstatic: { emoji: '🤩', text: 'Jestem niesamowita!', threshold: 120 },
+            happy: { emoji: '😊', text: 'Świetnie się spisujemy!', threshold: 100 },
+            good: { emoji: '🙂', text: 'Idzie dobrze!', threshold: 85 },
+            neutral: { emoji: '😐', text: 'Może być lepiej...', threshold: 70 },
+            worried: { emoji: '😟', text: 'Potrzebuję wsparcia', threshold: 50 },
+            sad: { emoji: '😢', text: 'To trudny tydzień...', threshold: 0 }
+        };
+        
+        function getMood(percent) {
+            if (percent >= 120) return MOODS.ecstatic;
+            if (percent >= 100) return MOODS.happy;
+            if (percent >= 85) return MOODS.good;
+            if (percent >= 70) return MOODS.neutral;
+            if (percent >= 50) return MOODS.worried;
+            return MOODS.sad;
+        }
+        
+        function getStatusColor(percent) {
+            if (percent >= 100) return 'var(--green)';
+            if (percent >= 70) return 'var(--yellow)';
+            return 'var(--red)';
+        }
+        
+        function getStatusClass(percent) {
+            if (percent >= 100) return 'status-good';
+            if (percent >= 70) return 'status-warning';
+            return 'status-bad';
+        }
+        
+        function createRobotSVG(containerId, overallPercent, type) {
+            const container = document.getElementById(containerId);
+            const isMindy = type === 'mindy';
+            const primaryColor = isMindy ? '#4da6ff' : '#ff8c42';
+            
+            const mood = getMood(overallPercent);
+            const isHappy = overallPercent >= 100;
+            const isEcstatic = overallPercent >= 120;
+            const isSad = overallPercent < 50;
+            
+            // Eye expression based on mood
+            let eyeExpression = '';
+            if (isEcstatic) {
+                // Stars in eyes
+                eyeExpression = `
+                    <text x="85" y="73" font-size="14" text-anchor="middle">⭐</text>
+                    <text x="115" y="73" font-size="14" text-anchor="middle">⭐</text>
+                `;
+            } else if (isHappy) {
+                // Happy eyes (arcs)
+                eyeExpression = `
+                    <path d="M78 68 Q85 62 92 68" fill="none" stroke="${primaryColor}" stroke-width="3"/>
+                    <path d="M108 68 Q115 62 122 68" fill="none" stroke="${primaryColor}" stroke-width="3"/>
+                `;
+            } else if (isSad) {
+                // Sad eyes
+                eyeExpression = `
+                    <ellipse cx="85" cy="72" rx="8" ry="6" fill="${primaryColor}" opacity="0.5"/>
+                    <ellipse cx="115" cy="72" rx="8" ry="6" fill="${primaryColor}" opacity="0.5"/>
+                    <circle cx="85" cy="74" r="3" fill="${primaryColor}"/>
+                    <circle cx="115" cy="74" r="3" fill="${primaryColor}"/>
+                `;
+            } else {
+                // Normal eyes
+                eyeExpression = `
+                    <ellipse cx="85" cy="70" rx="10" ry="8" fill="#050508" stroke="${primaryColor}" stroke-width="2"/>
+                    <circle cx="85" cy="70" r="4" fill="${primaryColor}"/>
+                    <ellipse cx="115" cy="70" rx="10" ry="8" fill="#050508" stroke="${primaryColor}" stroke-width="2"/>
+                    <circle cx="115" cy="70" r="4" fill="${primaryColor}"/>
+                `;
+            }
+            
+            // Mouth based on mood
+            let mouthExpression = '';
+            if (isEcstatic) {
+                mouthExpression = `<path d="M80 90 Q100 105 120 90" fill="none" stroke="${primaryColor}" stroke-width="3"/>`;
+            } else if (isHappy) {
+                mouthExpression = `<path d="M85 88 Q100 98 115 88" fill="none" stroke="${primaryColor}" stroke-width="2"/>`;
+            } else if (isSad) {
+                mouthExpression = `<path d="M85 95 Q100 85 115 95" fill="none" stroke="${primaryColor}" stroke-width="2"/>`;
+            } else {
+                mouthExpression = `<rect x="88" y="88" width="24" height="4" rx="2" fill="${primaryColor}" opacity="0.5"/>`;
+            }
+            
+            // Antenna glow color
+            const antennaColor = isHappy ? '#00e6a0' : (isSad ? '#ff6b6b' : primaryColor);
+            
+            // Body glow intensity
+            const glowOpacity = Math.min(0.3 + (overallPercent / 200), 0.6);
+            
+            container.innerHTML = `
+                <defs>
+                    <linearGradient id="bodyGrad-${type}" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#1a1a24"/>
+                        <stop offset="100%" stop-color="#0d0d14"/>
+                    </linearGradient>
+                    <filter id="glow-${type}">
+                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+                
+                <!-- Glow effect based on performance -->
+                <ellipse cx="100" cy="180" rx="${50 + overallPercent/3}" ry="${30 + overallPercent/5}" 
+                    fill="${primaryColor}" opacity="${glowOpacity * 0.2}" filter="url(#glow-${type})"/>
+                
+                <!-- Shadow -->
+                <ellipse cx="100" cy="310" rx="50" ry="8" fill="${primaryColor}" opacity="0.15"/>
+                
+                <!-- Legs -->
+                <path d="M70 230 L65 285 Q65 295 75 295 L85 295 Q95 295 95 285 L90 230" 
+                    fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.7"/>
+                <path d="M110 230 L105 285 Q105 295 115 295 L125 295 Q135 295 135 285 L130 230" 
+                    fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.7"/>
+                
+                <!-- Body -->
+                <rect x="55" y="120" width="90" height="115" rx="18" fill="url(#bodyGrad-${type})" 
+                    stroke="${primaryColor}" stroke-width="1" opacity="0.6"/>
+                
+                <!-- Heart/Core -->
+                <circle cx="100" cy="175" r="25" fill="#0a0a14" stroke="${getStatusColor(overallPercent)}" stroke-width="2"/>
+                <circle cx="100" cy="175" r="15" fill="${getStatusColor(overallPercent)}" opacity="0.4">
+                    ${isHappy ? '<animate attributeName="r" values="15;18;15" dur="0.8s" repeatCount="indefinite"/>' : ''}
+                </circle>
+                <text x="100" y="180" font-size="16" text-anchor="middle">${overallPercent}%</text>
+                
+                <!-- Arms -->
+                ${isEcstatic ? `
+                    <!-- Arms up for celebration -->
+                    <path d="M55 140 Q25 100 35 70" fill="none" stroke="${primaryColor}" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M145 140 Q175 100 165 70" fill="none" stroke="${primaryColor}" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="35" cy="65" r="8" fill="${primaryColor}"/>
+                    <circle cx="165" cy="65" r="8" fill="${primaryColor}"/>
+                ` : `
+                    <!-- Normal arms -->
+                    <path d="M55 135 Q30 140 28 160 L25 200 Q23 212 38 215 L45 215 Q55 212 55 200" 
+                        fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.7"/>
+                    <path d="M145 135 Q170 140 172 160 L175 200 Q177 212 162 215 L155 215 Q145 212 145 200" 
+                        fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.7"/>
+                `}
+                
+                <!-- Neck -->
+                <rect x="88" y="100" width="24" height="22" rx="4" fill="#2a2a3a"/>
+                
+                <!-- Head -->
+                <rect x="58" y="25" width="84" height="80" rx="20" fill="url(#bodyGrad-${type})" 
+                    stroke="${primaryColor}" stroke-width="1" opacity="0.7"/>
+                
+                <!-- Face plate -->
+                <rect x="68" y="52" width="64" height="45" rx="12" fill="#0a0a14"/>
+                
+                <!-- Eyes & Mouth -->
+                ${eyeExpression}
+                ${mouthExpression}
+                
+                <!-- Eyebrows for sad -->
+                ${isSad ? `
+                    <line x1="75" y1="60" x2="92" y2="65" stroke="${primaryColor}" stroke-width="2"/>
+                    <line x1="125" y1="60" x2="108" y2="65" stroke="${primaryColor}" stroke-width="2"/>
+                ` : ''}
+                
+                <!-- Blush for happy -->
+                ${isHappy ? `
+                    <ellipse cx="72" cy="80" rx="6" ry="4" fill="#ff6b8a" opacity="0.3"/>
+                    <ellipse cx="128" cy="80" rx="6" ry="4" fill="#ff6b8a" opacity="0.3"/>
+                ` : ''}
+                
+                <!-- Antenna -->
+                <line x1="100" y1="25" x2="100" y2="8" stroke="#3a3a4a" stroke-width="3"/>
+                <circle cx="100" cy="5" r="5" fill="${antennaColor}" filter="url(#glow-${type})">
+                    <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- Gender symbol -->
+                ${isMindy ? `
+                    <circle cx="148" cy="38" r="7" fill="none" stroke="${primaryColor}" stroke-width="1.5" opacity="0.4"/>
+                    <line x1="148" y1="45" x2="148" y2="52" stroke="${primaryColor}" stroke-width="1.5" opacity="0.4"/>
+                    <line x1="144" y1="48" x2="152" y2="48" stroke="${primaryColor}" stroke-width="1.5" opacity="0.4"/>
+                ` : `
+                    <circle cx="148" cy="42" r="7" fill="none" stroke="${primaryColor}" stroke-width="1.5" opacity="0.4"/>
+                    <line x1="153" y1="37" x2="160" y2="30" stroke="${primaryColor}" stroke-width="1.5" opacity="0.4"/>
+                `}
+            `;
+            
+            // Apply animation class
+            container.classList.remove('robot-float', 'robot-happy');
+            if (isEcstatic) {
+                container.classList.add('robot-happy');
+            } else {
+                container.classList.add('robot-float');
+            }
+        }
+        
+        function renderKPIList(containerId, kpis, totals, teamTargets) {
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = kpis.map(kpi => {
+                const value = totals[kpi.key] || 0;
+                const target = teamTargets[kpi.key] || 1;
+                const percent = Math.round((value / target) * 100);
+                const color = getStatusColor(percent);
+                
+                return `
+                    <div class="kpi-item">
+                        <div class="kpi-icon" style="background: ${kpi.color}22; color: ${kpi.color}">${kpi.icon}</div>
+                        <div class="kpi-info">
+                            <div class="kpi-name">${kpi.name}</div>
+                            <div class="kpi-value" style="color: ${color}">${formatValue(value, kpi.key)} / ${formatValue(target, kpi.key)}</div>
+                        </div>
+                        <div class="kpi-bar">
+                            <div class="kpi-bar-fill" style="width: ${Math.min(percent, 100)}%; background: ${color};"></div>
+                        </div>
+                        <div class="kpi-percent" style="color: ${color}">${percent}%</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function formatValue(value, key) {
+            if (key === 'mrr') return Math.round(value).toLocaleString() + ' zł';
+            if (key === 'placements') return value.toFixed(1);
+            return Math.round(value);
+        }
+        
+        // Sorting: Placements → Rekomendacje → (CV + Weryfikacje)
+        function sortRekrutacja(data) {
+            return [...data].sort((a, b) => {
+                // 1. Placements (most important)
+                if (b.placements !== a.placements) return b.placements - a.placements;
+                // 2. Rekomendacje
+                if (b.rekomendacje !== a.rekomendacje) return b.rekomendacje - a.rekomendacje;
+                // 3. CV + Weryfikacje (equal weight)
+                const aSecondary = (a.cv_dodane || 0) + (a.weryfikacje || 0);
+                const bSecondary = (b.cv_dodane || 0) + (b.weryfikacje || 0);
+                return bSecondary - aSecondary;
+            });
+        }
+        
+        // Sorting: MRR → Oferty → Leady
+        function sortSprzedaz(data) {
+            return [...data].sort((a, b) => {
+                // 1. MRR (najważniejsze)
+                if ((b.mrr || 0) !== (a.mrr || 0)) return (b.mrr || 0) - (a.mrr || 0);
+                // 2. Wysłane oferty
+                if ((b.oferty || 0) !== (a.oferty || 0)) return (b.oferty || 0) - (a.oferty || 0);
+                // 3. Leady
+                return (b.leady || 0) - (a.leady || 0);
+            });
+        }
+        
+        function renderTable(tableId, data, type) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            const sorted = type === 'rekrutacja' ? sortRekrutacja(data) : sortSprzedaz(data);
+            
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#666;">Brak danych za ten tydzień</td></tr>`;
+                return;
+            }
+            
+            if (type === 'rekrutacja') {
+                tbody.innerHTML = sorted.map((p, i) => `
+                    <tr>
+                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
+                        <td><strong>${p.imie}</strong></td>
+                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
+                        <td class="placement-cell ${p.placements > 0 ? 'has-placement' : 'no-placement'}">${p.placements || 0}</td>
+                        <td>${p.rekomendacje || '-'}</td>
+                        <td>${p.cv_dodane || '-'}</td>
+                        <td>${p.weryfikacje || '-'}</td>
+                        <td style="color:#666;">${p.dni_pracy || 5}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = sorted.map((p, i) => `
+                    <tr>
+                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
+                        <td><strong>${p.imie}</strong></td>
+                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
+                        <td class="${p.mrr > 0 ? 'status-good' : ''}" style="font-weight:600;">${p.mrr ? p.mrr.toLocaleString() + ' zł' : '-'}</td>
+                        <td>${p.oferty || '-'}</td>
+                        <td>${p.leady || '-'}</td>
+                        <td style="color:#666;">${p.dni_pracy || 5}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        function renderAverageTable(tableId, data, type) {
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#666;">Brak danych historycznych</td></tr>`;
+                return;
+            }
+            
+            if (type === 'rekrutacja') {
+                // Already sorted by server: placements DESC, reco_per_day DESC, cv+weryf DESC
+                tbody.innerHTML = data.map((p, i) => `
+                    <tr>
+                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
+                        <td><strong>${p.imie}</strong></td>
+                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
+                        <td class="placement-cell ${p.total_placements > 0 ? 'has-placement' : 'no-placement'}">${p.total_placements || 0}</td>
+                        <td>${p.reco_per_day || '-'}</td>
+                        <td>${p.cv_per_day || '-'}</td>
+                        <td>${p.weryf_per_day || '-'}</td>
+                        <td style="color:#666;">${p.tygodni || 0}</td>
+                    </tr>
+                `).join('');
+            } else {
+                // Already sorted by server: mrr_per_week DESC, oferty_per_day DESC, leady_per_day DESC
+                tbody.innerHTML = data.map((p, i) => `
+                    <tr>
+                        <td><span class="rank-badge ${i < 3 ? 'rank-' + (i+1) : 'rank-other'}">${i + 1}</span></td>
+                        <td><strong>${p.imie}</strong></td>
+                        <td><span class="stanowisko-badge">${p.stanowisko}</span></td>
+                        <td class="${p.mrr_per_week > 0 ? 'status-good' : ''}" style="font-weight:600;">${p.mrr_per_week ? Math.round(p.mrr_per_week).toLocaleString() + ' zł' : '-'}</td>
+                        <td>${p.oferty_per_day || '-'}</td>
+                        <td>${p.leady_per_day || '-'}</td>
+                        <td style="color:#666;">${p.tygodni || 0}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+        
+        function renderHitRatioTable(data) {
+            const tbody = document.querySelector('#table-hitratio tbody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666;">Brak danych</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.map(h => `
+                <tr>
+                    <td><strong>${h.imie}</strong></td>
+                    <td class="placement-cell has-placement">${h.placements}</td>
+                    <td>${h.zamkniete_requesty}</td>
+                    <td class="${h.hit_ratio >= 30 ? 'status-good' : 'status-bad'}" style="font-weight:600;">${h.hit_ratio}%</td>
+                    <td>${h.hit_ratio >= 30 ? '✅ Cel' : '⚠️ Poniżej 30%'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function calculateOverallScore(totals, teamTargets, type) {
+            let score = 0;
+            let count = 0;
+            
+            if (type === 'rekrutacja') {
+                if (teamTargets.weryfikacje > 0) { score += (totals.weryfikacje / teamTargets.weryfikacje) * 100; count++; }
+                if (teamTargets.rekomendacje > 0) { score += (totals.rekomendacje / teamTargets.rekomendacje) * 100; count++; }
+                if (teamTargets.cv_dodane > 0) { score += (totals.cv_dodane / teamTargets.cv_dodane) * 100; count++; }
+                if (teamTargets.placements > 0) { score += (totals.placements / teamTargets.placements) * 100; count++; }
+            } else {
+                // Sprzedaż: MRR → Oferty → Leady
+                if (teamTargets.mrr > 0) { score += (totals.mrr / teamTargets.mrr) * 100; count++; }
+                if (teamTargets.oferty > 0) { score += (totals.oferty / teamTargets.oferty) * 100; count++; }
+                if (teamTargets.leady > 0) { score += (totals.leady / teamTargets.leady) * 100; count++; }
+            }
+            
+            return count > 0 ? Math.round(score / count) : 0;
+        }
+        
+        async function loadDashboard(rok, tydzien) {
+            try {
+                const params = new URLSearchParams();
+                if (rok) params.append('rok', rok);
+                if (tydzien) params.append('tydzien', tydzien);
+                
+                const response = await fetch('/api/dashboard?' + params);
+                dashboardData = await response.json();
+                
+                // Week selector
+                const weekSelect = document.getElementById('weekSelect');
+                if (dashboardData.weeks && dashboardData.weeks.length > 0) {
+                    weekSelect.innerHTML = dashboardData.weeks.map(w => 
+                        `<option value="${w.rok}-${w.tydzien}" ${w.rok === dashboardData.rok && w.tydzien === dashboardData.tydzien ? 'selected' : ''}>
+                            Tydzień ${w.tydzien} / ${w.rok}
+                        </option>`
+                    ).join('');
+                } else {
+                    const now = new Date();
+                    weekSelect.innerHTML = `<option value="${now.getFullYear()}-${getWeekNumber(now)}">Tydzień ${getWeekNumber(now)} / ${now.getFullYear()}</option>`;
+                }
+                
+                // Calculate totals
+                const rekTotals = {
+                    weryfikacje: dashboardData.current.rekrutacja.reduce((s, r) => s + (r.weryfikacje || 0), 0),
+                    rekomendacje: dashboardData.current.rekrutacja.reduce((s, r) => s + (r.rekomendacje || 0), 0),
+                    cv_dodane: dashboardData.current.rekrutacja.reduce((s, r) => s + (r.cv_dodane || 0), 0),
+                    placements: dashboardData.current.rekrutacja.reduce((s, r) => s + (r.placements || 0), 0)
+                };
+                
+                const salesTotals = {
+                    leady: dashboardData.current.sprzedaz.reduce((s, r) => s + (r.leady || 0), 0),
+                    oferty: dashboardData.current.sprzedaz.reduce((s, r) => s + (r.oferty || 0), 0),
+                    mrr: dashboardData.current.sprzedaz.reduce((s, r) => s + (r.mrr || 0), 0),
+                    placements: dashboardData.current.sprzedaz.reduce((s, r) => s + (r.placements || 0), 0)
+                };
+                
+                const tt = dashboardData.teamTargets;
+                
+                // MINDY
+                document.getElementById('mindy-team-count').textContent = dashboardData.current.rekrutacja.length;
+                const mindyScore = calculateOverallScore(rekTotals, tt.rekrutacja, 'rekrutacja');
+                document.getElementById('mindy-score').textContent = mindyScore + '%';
+                document.getElementById('mindy-score').style.color = getStatusColor(mindyScore);
+                
+                const mindyMood = getMood(mindyScore);
+                document.getElementById('mindy-mood').textContent = mindyMood.emoji + ' ' + mindyMood.text;
+                
+                createRobotSVG('mindy-robot', mindyScore, 'mindy');
+                
+                renderKPIList('mindy-kpis', [
+                    { key: 'placements', name: 'Placements', icon: '🏆', color: '#00e6a0' },
+                    { key: 'rekomendacje', name: 'Rekomendacje', icon: '🧠', color: '#66b3ff' },
+                    { key: 'cv_dodane', name: 'CV do bazy', icon: '📁', color: '#99ccff' },
+                    { key: 'weryfikacje', name: 'Weryfikacje', icon: '👁', color: '#4da6ff' }
+                ], rekTotals, tt.rekrutacja);
+                
+                // INFRON
+                document.getElementById('infron-team-count').textContent = dashboardData.current.sprzedaz.length;
+                const infronScore = calculateOverallScore(salesTotals, tt.sprzedaz, 'sprzedaz');
+                document.getElementById('infron-score').textContent = infronScore + '%';
+                document.getElementById('infron-score').style.color = getStatusColor(infronScore);
+                
+                const infronMood = getMood(infronScore);
+                document.getElementById('infron-mood').textContent = infronMood.emoji + ' ' + infronMood.text;
+                
+                createRobotSVG('infron-robot', infronScore, 'infron');
+                
+                renderKPIList('infron-kpis', [
+                    { key: 'mrr', name: 'MRR', icon: '💎', color: '#ffd54f' },
+                    { key: 'oferty', name: 'Wysłane oferty', icon: '✋', color: '#ffaa66' },
+                    { key: 'leady', name: 'Leady', icon: '👁', color: '#ff8c42' }
+                ], salesTotals, tt.sprzedaz);
+                
+                // Tables - weekly
+                document.getElementById('week-label-rek').textContent = dashboardData.tydzien;
+                document.getElementById('week-label-sales').textContent = dashboardData.tydzien;
+                renderTable('table-rekrutacja', dashboardData.current.rekrutacja, 'rekrutacja');
+                renderTable('table-sprzedaz', dashboardData.current.sprzedaz, 'sprzedaz');
+                
+                // Tables - average (per working day)
+                renderAverageTable('table-rekrutacja-avg', dashboardData.average.rekrutacja, 'rekrutacja');
+                renderAverageTable('table-sprzedaz-avg', dashboardData.average.sprzedaz, 'sprzedaz');
+                
+                renderHitRatioTable(dashboardData.current.hitRatio);
+                
+                // Analysis
+                if (dashboardData.analysis) {
+                    document.getElementById('analysis-content').innerHTML = formatAnalysis(dashboardData.analysis);
+                } else {
+                    document.getElementById('analysis-content').innerHTML = '<div class="analysis-empty">Kliknij "Generuj analizę" aby otrzymać AI analizę danych</div>';
+                }
+                
+                // Averages
+                const avgRek = dashboardData.average.rekrutacja;
+                const avgSales = dashboardData.average.sprzedaz;
+                
+                if (avgRek.length > 0) {
+                    document.getElementById('avg-placements').textContent = (avgRek.reduce((s, r) => s + (r.total_placements || 0), 0) / avgRek.length).toFixed(1);
+                    document.getElementById('avg-reco').textContent = (avgRek.reduce((s, r) => s + (r.avg_rekomendacje || 0), 0) / avgRek.length).toFixed(1);
+                    document.getElementById('avg-cv').textContent = (avgRek.reduce((s, r) => s + (r.avg_cv || 0), 0) / avgRek.length).toFixed(1);
+                }
+                
+                if (avgSales.length > 0) {
+                    document.getElementById('avg-mrr').innerHTML = Math.round(avgSales.reduce((s, r) => s + (r.avg_mrr || 0), 0) / avgSales.length).toLocaleString() + '<span class="avg-unit"> zł</span>';
+                }
+                
+            } catch (err) {
+                console.error('Error:', err);
+            }
+        }
+        
+        function formatAnalysis(text) {
+            return text
+                .replace(/## /g, '<h2>')
+                .replace(/\n\n/g, '</h2>\n')
+                .replace(/\n- /g, '<br>• ')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+        
+        async function generateAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            const content = document.getElementById('analysis-content');
+            
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Generuję...';
+            content.innerHTML = '<div class="analysis-empty">🤖 AI analizuje dane...</div>';
+            
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rok: dashboardData?.rok, tydzien: dashboardData?.tydzien })
+                });
+                
+                const result = await response.json();
+                content.innerHTML = formatAnalysis(result.analysis);
+            } catch (err) {
+                content.innerHTML = '<div style="color: var(--red);">Błąd generowania analizy</div>';
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<span>🤖</span> Generuj analizę';
+        }
+        
+        async function askForHelp(dzial) {
+            const btn = document.querySelector(`.help-btn.${dzial === 'rekrutacja' ? 'mindy' : 'infron'}`);
+            btn.classList.add('loading');
+            btn.innerHTML = '<span>⏳</span> Myślę...';
+            
+            const modalTitle = document.getElementById('modalTitle');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTitle.innerHTML = dzial === 'rekrutacja' 
+                ? '💙 MINDY mówi:' 
+                : '🧡 INFRON mówi:';
+            modalContent.innerHTML = '🤖 Analizuję dane...';
+            
+            document.getElementById('helpModal').classList.add('active');
+            
+            try {
+                const response = await fetch(`/api/help/${dzial}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rok: dashboardData?.rok, tydzien: dashboardData?.tydzien })
+                });
+                
+                const result = await response.json();
+                
+                if (result.help) {
+                    modalContent.innerHTML = result.help.replace(/\n/g, '<br>');
+                } else {
+                    modalContent.innerHTML = 'Błąd: ' + (result.error || 'Nieznany błąd');
+                }
+            } catch (err) {
+                modalContent.innerHTML = 'Błąd połączenia';
+            }
+            
+            btn.classList.remove('loading');
+            btn.innerHTML = '<span>💬</span> Jak mogę pomóc?';
+        }
+        
+        function closeModal() {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+        
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        document.getElementById('weekSelect').addEventListener('change', function() {
+            const [rok, tydzien] = this.value.split('-');
+            loadDashboard(parseInt(rok), parseInt(tydzien));
+        });
+        
+        document.getElementById('helpModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+        
+        loadDashboard();
+    </script>
+</body>
+</html>
