@@ -401,7 +401,7 @@ WAŻNE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-20240620', // Changed model to latest Sonnet 3.5 which supports output tokens
+                model: 'claude-3-5-sonnet-latest',
                 max_tokens: 4096,
                 messages: [{ role: 'user', content: prompt }]
             })
