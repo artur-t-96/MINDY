@@ -433,14 +433,19 @@ WAŻNE:
 
         if (result.content && result.content[0]) {
             let jsonText = result.content[0].text;
+            console.log("AI Response length:", jsonText.length);
             const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
 
             if (jsonMatch) {
                 jsonText = jsonMatch[0];
                 try {
-                    return JSON.parse(jsonText);
+                    const parsed = JSON.parse(jsonText);
+                    console.log("JSON parsed successfully. Records:", parsed.detected_data?.length || 0);
+                    return parsed;
                 } catch (parseErr) {
                     console.log("JSON Parse Error. Attempting repair with jsonrepair...");
+                    console.log("First 500 chars:", jsonText.substring(0, 500));
+                    console.log("Last 500 chars:", jsonText.substring(jsonText.length - 500));
 
                     // Use jsonrepair library for robust JSON repair
                     try {
@@ -675,7 +680,13 @@ function importAnalyzedData(analysisResult) {
     const importDetails = [];
     const importedPeriods = new Set();
 
-    if (!analysisResult.detected_data) return { imported: 0, details: [], periods: [] };
+    console.log("=== Import Analysis ===");
+    console.log("detected_data:", JSON.stringify(analysisResult.detected_data, null, 2).substring(0, 1000));
+
+    if (!analysisResult.detected_data) {
+        console.log("No detected_data found!");
+        return { imported: 0, details: [], periods: [] };
+    }
 
     analysisResult.detected_data.forEach(dataSet => {
         const type = dataSet.type;
