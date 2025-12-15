@@ -401,7 +401,7 @@ WAŻNE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-5-sonnet-latest',
+                model: 'claude-3-opus-20240229', // Switched to Opus for better availability
                 max_tokens: 4096,
                 messages: [{ role: 'user', content: prompt }]
             })
@@ -522,7 +522,7 @@ SUMY vs TARGETY ZESPOŁOWE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
+                model: 'claude-3-opus-20240229',
                 max_tokens: 600,
                 messages: [{
                     role: 'user',
@@ -605,8 +605,8 @@ async function generateFullAnalysis(rok, tydzien) {
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-sonnet-4-20250514',
-                max_tokens: 800,
+                model: 'claude-3-opus-20240229',
+                max_tokens: 1000,
                 messages: [{
                     role: 'user',
                     content: `${context}
