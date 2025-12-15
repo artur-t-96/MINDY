@@ -418,8 +418,8 @@ WAŻNE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-haiku-20240307', // Switched to Haiku for best availability
-                max_tokens: 8192,  // Increased from 4096 to handle larger Excel files
+                model: 'claude-3-5-sonnet-20241022',  // Sonnet supports 8192 output tokens
+                max_tokens: 8192,
                 messages: [{ role: 'user', content: prompt }]
             })
         });
