@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rada Nadzorcza | InfraMinds</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --primary: #9966ff; --bg: #0a0a0f; --card-bg: rgba(255,255,255,0.03); }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            min-height: 100vh; color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .logo a { color: inherit; text-decoration: none; }
+        .nav-links a { color: #888; text-decoration: none; margin-left: 20px; }
+        .nav-links a:hover { color: #fff; }
+        
+        .period-selector { display: flex; gap: 10px; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
+        .period-selector select, .period-selector button {
+            padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: var(--card-bg); color: #fff; cursor: pointer;
+        }
+        .period-selector button { background: var(--primary); color: #000; font-weight: 600; }
+        
+        .section-title {
+            font-size: 1.3rem; font-weight: 700; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .section-title .icon { font-size: 1.5rem; }
+        
+        /* Hit Ratio Section */
+        .hit-ratio-section { margin-bottom: 40px; }
+        .hr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .hr-card {
+            background: var(--card-bg); border-radius: 16px; padding: 25px;
+            text-align: center; border-left: 4px solid var(--primary);
+        }
+        .hr-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 12px; }
+        .hr-value { font-size: 3rem; font-weight: 800; }
+        .hr-value.good { color: #00e6a0; }
+        .hr-value.warn { color: #ffc800; }
+        .hr-value.bad { color: #ff5050; }
+        .hr-details { color: #666; font-size: 0.9rem; margin-top: 10px; }
+        .hr-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 15px; overflow: hidden; }
+        .hr-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        
+        /* KPI Tables */
+        .kpi-section { margin-bottom: 40px; }
+        .kpi-table-container { background: var(--card-bg); border-radius: 16px; padding: 20px; overflow-x: auto; }
+        .kpi-table { width: 100%; border-collapse: collapse; }
+        .kpi-table th, .kpi-table td { padding: 14px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .kpi-table th { color: #888; font-weight: 500; font-size: 0.85rem; background: rgba(0,0,0,0.2); }
+        .kpi-code { font-family: monospace; background: rgba(153,102,255,0.2); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; }
+        .kpi-name { font-weight: 500; }
+        .kpi-freq { color: #666; font-size: 0.85rem; }
+        .kpi-value { font-weight: 700; font-size: 1.1rem; }
+        .kpi-target { color: #888; }
+        .kpi-status { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+        .kpi-status.green { background: rgba(0,230,160,0.2); color: #00e6a0; }
+        .kpi-status.yellow { background: rgba(255,200,0,0.2); color: #ffc800; }
+        .kpi-status.red { background: rgba(255,80,80,0.2); color: #ff5050; }
+        
+        /* Opisowe KPI */
+        .opisowe-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .opisowe-card {
+            background: var(--card-bg); border-radius: 16px; padding: 20px;
+            border-top: 3px solid var(--primary);
+        }
+        .opisowe-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .opisowe-code { font-family: monospace; color: var(--primary); }
+        .opisowe-name { font-weight: 600; font-size: 1rem; margin-bottom: 10px; }
+        .opisowe-desc { color: #aaa; line-height: 1.6; font-size: 0.95rem; }
+        .opisowe-empty { color: #666; font-style: italic; }
+        
+        /* Summary */
+        .summary-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+            background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 40px;
+        }
+        @media (max-width: 800px) { .summary-bar { grid-template-columns: repeat(2, 1fr); } }
+        .summary-item { text-align: center; }
+        .summary-label { font-size: 0.8rem; color: #888; margin-bottom: 8px; }
+        .summary-value { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        
+        footer { text-align: center; padding: 30px; color: #555; }
+        footer a { color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><a href="/">← InfraMinds</a> / Rada Nadzorcza</div>
+            <div class="nav-links">
+                <a href="/body-leasing">Body Leasing</a>
+                <a href="/sprzedaz">Sprzedaż</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </header>
+        
+        <div class="period-selector">
+            <label>Miesiąc:</label>
+            <select id="monthSelect">
+                <option value="1">Styczeń</option><option value="2">Luty</option>
+                <option value="3">Marzec</option><option value="4">Kwiecień</option>
+                <option value="5">Maj</option><option value="6">Czerwiec</option>
+                <option value="7">Lipiec</option><option value="8">Sierpień</option>
+                <option value="9">Wrzesień</option><option value="10">Październik</option>
+                <option value="11">Listopad</option><option value="12">Grudzień</option>
+            </select>
+            <label>Rok:</label>
+            <select id="yearSelect">
+                <option value="2024">2024</option>
+                <option value="2025" selected>2025</option>
+            </select>
+            <button onclick="loadData()">Odśwież</button>
+        </div>
+        
+        <!-- Summary -->
+        <div class="summary-bar" id="summaryBar">
+            <div class="summary-item">
+                <div class="summary-label">Delivery Leads</div>
+                <div class="summary-value" id="sumDL">-</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Śr. Hit Ratio</div>
+                <div class="summary-value" id="sumHR">-</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">KPI Matematyczne</div>
+                <div class="summary-value" id="sumKpiMat">-</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">KPI Opisowe</div>
+                <div class="summary-value" id="sumKpiOp">-</div>
+            </div>
+        </div>
+        
+        <!-- Hit Ratio -->
+        <div class="hit-ratio-section">
+            <div class="section-title"><span class="icon">🎯</span> Delivery Leads — Hit Ratio</div>
+            <div class="hr-grid" id="hrGrid"></div>
+        </div>
+        
+        <!-- KPI Matematyczne Tygodniowe -->
+        <div class="kpi-section">
+            <div class="section-title"><span class="icon">📊</span> KPI Matematyczne — Tygodniowe</div>
+            <div class="kpi-table-container">
+                <table class="kpi-table" id="kpiWeeklyTable">
+                    <thead>
+                        <tr><th>Kod</th><th>Nazwa KPI</th><th>Wartość</th><th>Target</th><th>Status</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- KPI Matematyczne Miesięczne -->
+        <div class="kpi-section">
+            <div class="section-title"><span class="icon">📈</span> KPI Matematyczne — Miesięczne</div>
+            <div class="kpi-table-container">
+                <table class="kpi-table" id="kpiMonthlyTable">
+                    <thead>
+                        <tr><th>Kod</th><th>Nazwa KPI</th><th>Wartość</th><th>Target</th><th>Status</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- KPI Opisowe -->
+        <div class="kpi-section">
+            <div class="section-title"><span class="icon">📝</span> KPI Opisowe — Miesięczne</div>
+            <div class="opisowe-grid" id="opisoweGrid"></div>
+        </div>
+        
+        <footer>Rada Nadzorcza © InfraMinds 2025 | <a href="/admin">Panel Admin</a></footer>
+    </div>
+    
+    <script>
+        let kpiDefinitions = null;
+        
+        async function loadData() {
+            const rok = document.getElementById('yearSelect').value;
+            const miesiac = document.getElementById('monthSelect').value;
+            
+            const res = await fetch(`/api/rada-nadzorcza?rok=${rok}&miesiac=${miesiac}`);
+            const data = await res.json();
+            kpiDefinitions = data.kpiDefinitions;
+            
+            renderHitRatio(data.data.hitRatio);
+            renderKpiWeekly(data.data.kpiMat, kpiDefinitions.matematyczne.tygodniowe);
+            renderKpiMonthly(data.data.kpiMat, kpiDefinitions.matematyczne.miesieczne);
+            renderKpiOpisowe(data.data.kpiOpisowe, kpiDefinitions.opisowe);
+            updateSummary(data.data);
+        }
+        
+        function renderHitRatio(data) {
+            const grid = document.getElementById('hrGrid');
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<div style="color:#666;padding:40px;text-align:center;">Brak danych Hit Ratio za wybrany okres</div>';
+                return;
+            }
+            
+            grid.innerHTML = data.map(h => {
+                const cls = h.hit_ratio >= 30 ? 'good' : h.hit_ratio >= 20 ? 'warn' : 'bad';
+                const color = h.hit_ratio >= 30 ? '#00e6a0' : h.hit_ratio >= 20 ? '#ffc800' : '#ff5050';
+                const pct = Math.min(h.hit_ratio / 50 * 100, 100);
+                return `
+                    <div class="hr-card">
+                        <div class="hr-name">${h.imie}</div>
+                        <div class="hr-value ${cls}">${h.hit_ratio}%</div>
+                        <div class="hr-details">${h.placements} placements / ${h.zamkniete_requesty} zamkniętych requestów</div>
+                        <div class="hr-bar"><div class="hr-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderKpiWeekly(data, definitions) {
+            const tbody = document.querySelector('#kpiWeeklyTable tbody');
+            tbody.innerHTML = definitions.map(def => {
+                const kpi = data.find(k => k.kpi_code === def.code) || { wartosc: null, target: def.target };
+                const pct = kpi.target > 0 && kpi.wartosc !== null ? Math.round(kpi.wartosc / kpi.target * 100) : null;
+                const status = pct === null ? 'yellow' : pct >= 100 ? 'green' : pct >= 70 ? 'yellow' : 'red';
+                const statusText = pct === null ? 'Brak danych' : `${pct}%`;
+                return `
+                    <tr>
+                        <td><span class="kpi-code">${def.code}</span></td>
+                        <td class="kpi-name">${def.name}</td>
+                        <td class="kpi-value">${kpi.wartosc !== null ? kpi.wartosc : '-'}</td>
+                        <td class="kpi-target">${kpi.target || def.target}</td>
+                        <td><span class="kpi-status ${status}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function renderKpiMonthly(data, definitions) {
+            const tbody = document.querySelector('#kpiMonthlyTable tbody');
+            tbody.innerHTML = definitions.map(def => {
+                const kpi = data.find(k => k.kpi_code === def.code) || { wartosc: null, target: def.target };
+                const pct = kpi.target > 0 && kpi.wartosc !== null ? Math.round(kpi.wartosc / kpi.target * 100) : null;
+                const status = pct === null ? 'yellow' : pct >= 100 ? 'green' : pct >= 70 ? 'yellow' : 'red';
+                const statusText = pct === null ? 'Brak danych' : `${pct}%`;
+                return `
+                    <tr>
+                        <td><span class="kpi-code">${def.code}</span></td>
+                        <td class="kpi-name">${def.name}</td>
+                        <td class="kpi-value">${kpi.wartosc !== null ? kpi.wartosc + (def.code === 'DL-HR' ? '%' : '') : '-'}</td>
+                        <td class="kpi-target">${kpi.target || def.target}${def.code === 'DL-HR' ? '%' : ''}</td>
+                        <td><span class="kpi-status ${status}">${statusText}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function renderKpiOpisowe(data, definitions) {
+            const grid = document.getElementById('opisoweGrid');
+            grid.innerHTML = definitions.map(def => {
+                const kpi = data.find(k => k.kpi_code === def.code);
+                const status = kpi?.status || 'yellow';
+                return `
+                    <div class="opisowe-card">
+                        <div class="opisowe-header">
+                            <span class="opisowe-code">${def.code}</span>
+                            <span class="kpi-status ${status}">${status === 'green' ? '✓ OK' : status === 'red' ? '✗ Problem' : '○ Do oceny'}</span>
+                        </div>
+                        <div class="opisowe-name">${def.name}</div>
+                        <div class="opisowe-desc">${kpi?.opis || '<span class="opisowe-empty">Brak opisu za ten okres</span>'}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function updateSummary(data) {
+            document.getElementById('sumDL').textContent = data.hitRatio.length || '0';
+            
+            const avgHR = data.hitRatio.length > 0 
+                ? Math.round(data.hitRatio.reduce((s, h) => s + h.hit_ratio, 0) / data.hitRatio.length) 
+                : 0;
+            document.getElementById('sumHR').textContent = avgHR + '%';
+            
+            document.getElementById('sumKpiMat').textContent = data.kpiMat.length || '0';
+            document.getElementById('sumKpiOp').textContent = data.kpiOpisowe.length || '0';
+        }
+        
+        // Set current month
+        document.getElementById('monthSelect').value = new Date().getMonth() + 1;
+        loadData();
+    </script>
+</body>
+</html>

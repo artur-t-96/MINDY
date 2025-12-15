@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administracyjny | InfraMinds</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            min-height: 100vh; color: #fff;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; }
+        .logo a { color: #fff; text-decoration: none; }
+        
+        .auth-card {
+            background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px; margin-bottom: 30px;
+        }
+        .auth-card input {
+            padding: 12px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3); color: #fff; width: 300px;
+        }
+        .auth-card label { color: #888; margin-right: 10px; }
+        
+        .tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 24px; border-radius: 8px; cursor: pointer;
+            background: rgba(255,255,255,0.05); color: #888; font-weight: 500;
+            border: 2px solid transparent; transition: all 0.3s;
+        }
+        .tab:hover { background: rgba(255,255,255,0.1); }
+        .tab.active { border-color: var(--tab-color, #9966ff); color: #fff; background: rgba(255,255,255,0.1); }
+        .tab.body-leasing { --tab-color: #00e6a0; }
+        .tab.sprzedaz { --tab-color: #ff6b35; }
+        .tab.rada { --tab-color: #9966ff; }
+        .tab.historia { --tab-color: #666; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .upload-section {
+            background: rgba(255,255,255,0.03); border-radius: 16px; padding: 30px;
+            border-top: 3px solid var(--section-color, #9966ff);
+        }
+        .upload-section.body-leasing { --section-color: #00e6a0; }
+        .upload-section.sprzedaz { --section-color: #ff6b35; }
+        .upload-section.rada { --section-color: #9966ff; }
+        
+        .section-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .section-title .icon { font-size: 1.5rem; }
+        
+        .dropzone {
+            border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px;
+            padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .dropzone:hover, .dropzone.dragover { border-color: var(--section-color); background: rgba(255,255,255,0.05); }
+        .dropzone-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+        .dropzone-text { color: #888; }
+        
+        .file-list { margin-bottom: 20px; }
+        .file-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 8px;
+        }
+        .file-item .name { font-weight: 500; }
+        .file-item .size { color: #666; font-size: 0.85rem; }
+        .file-item .remove { color: #ff5050; cursor: pointer; font-size: 1.2rem; }
+        
+        .upload-btn {
+            padding: 14px 30px; border-radius: 8px; border: none;
+            background: var(--section-color); color: #000; font-weight: 600;
+            cursor: pointer; font-size: 1rem; transition: all 0.3s;
+        }
+        .upload-btn:hover { transform: scale(1.02); }
+        .upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .result { margin-top: 20px; padding: 20px; border-radius: 12px; }
+        .result.success { background: rgba(0,230,160,0.1); border: 1px solid rgba(0,230,160,0.3); }
+        .result.error { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.3); }
+        
+        .template-info {
+            background: rgba(0,0,0,0.3); border-radius: 12px; padding: 20px; margin-top: 20px;
+        }
+        .template-info h4 { color: #888; margin-bottom: 10px; font-size: 0.9rem; }
+        .template-info code { display: block; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #aaa; margin-top: 8px; overflow-x: auto; }
+        
+        .history-table { width: 100%; border-collapse: collapse; }
+        .history-table th, .history-table td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .history-table th { color: #888; font-weight: 500; }
+        .panel-badge { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .panel-badge.body-leasing { background: rgba(0,230,160,0.2); color: #00e6a0; }
+        .panel-badge.sprzedaz { background: rgba(255,107,53,0.2); color: #ff6b35; }
+        .panel-badge.rada-nadzorcza { background: rgba(153,102,255,0.2); color: #9966ff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><a href="/">← InfraMinds</a> / Admin</div>
+        </header>
+        
+        <div class="auth-card">
+            <label>🔑 Hasło:</label>
+            <input type="password" id="password" placeholder="Hasło administratora">
+        </div>
+        
+        <div class="tabs">
+            <div class="tab body-leasing active" data-tab="body-leasing">💼 Body Leasing</div>
+            <div class="tab sprzedaz" data-tab="sprzedaz">💰 Sprzedaż</div>
+            <div class="tab rada" data-tab="rada">👔 Rada Nadzorcza</div>
+            <div class="tab historia" data-tab="historia">📋 Historia</div>
+        </div>
+        
+        <!-- Body Leasing Upload -->
+        <div class="tab-content active" id="tab-body-leasing">
+            <div class="upload-section body-leasing">
+                <div class="section-title"><span class="icon">💼</span> Upload danych Body Leasing (MINDY)</div>
+                <div class="dropzone" id="dropzone-bl">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Przeciągnij plik Excel lub kliknij</div>
+                </div>
+                <input type="file" id="files-bl" accept=".xlsx,.xls" multiple hidden>
+                <div class="file-list" id="filelist-bl"></div>
+                <button class="upload-btn" id="uploadBtn-bl" disabled onclick="upload('body-leasing')">📤 Wgraj dane Body Leasing</button>
+                <div class="result" id="result-bl" style="display:none"></div>
+                
+                <div class="template-info">
+                    <h4>📋 Wymagany format (arkusz "Rekrutacja"):</h4>
+                    <code>Tydzien | Rok | Imie | Stanowisko | Dni pracy | Weryfikacje | Rekomendacje | CV do bazy | Placements</code>
+                    <p style="color:#666;margin-top:10px;font-size:0.85rem;">Stanowiska: Sourcer, Rekruter, TAC, Delivery Lead</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sprzedaż Upload -->
+        <div class="tab-content" id="tab-sprzedaz">
+            <div class="upload-section sprzedaz">
+                <div class="section-title"><span class="icon">💰</span> Upload danych Sprzedaż (INFRON)</div>
+                <div class="dropzone" id="dropzone-sp">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Przeciągnij plik Excel lub kliknij</div>
+                </div>
+                <input type="file" id="files-sp" accept=".xlsx,.xls" multiple hidden>
+                <div class="file-list" id="filelist-sp"></div>
+                <button class="upload-btn" id="uploadBtn-sp" disabled onclick="upload('sprzedaz')">📤 Wgraj dane Sprzedaż</button>
+                <div class="result" id="result-sp" style="display:none"></div>
+                
+                <div class="template-info">
+                    <h4>📋 Wymagany format (arkusz "Sprzedaz"):</h4>
+                    <code>Tydzien | Rok | Imie | Stanowisko | Dni pracy | Leady | Oferty | MRR</code>
+                    <p style="color:#666;margin-top:10px;font-size:0.85rem;">Stanowiska: SDR, BDM, Head of Technology</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rada Nadzorcza Upload -->
+        <div class="tab-content" id="tab-rada">
+            <div class="upload-section rada">
+                <div class="section-title"><span class="icon">👔</span> Upload danych Rada Nadzorcza</div>
+                <div class="dropzone" id="dropzone-rn">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Przeciągnij plik Excel lub kliknij</div>
+                </div>
+                <input type="file" id="files-rn" accept=".xlsx,.xls" multiple hidden>
+                <div class="file-list" id="filelist-rn"></div>
+                <button class="upload-btn" id="uploadBtn-rn" disabled onclick="upload('rada-nadzorcza')">📤 Wgraj dane Rady</button>
+                <div class="result" id="result-rn" style="display:none"></div>
+                
+                <div class="template-info">
+                    <h4>📋 Wymagane arkusze:</h4>
+                    <p style="color:#888;margin:10px 0;font-size:0.9rem;"><strong>Arkusz "HitRatio":</strong></p>
+                    <code>Miesiac | Rok | Delivery Lead | Zamkniete Requesty | Placements</code>
+                    
+                    <p style="color:#888;margin:15px 0 10px;font-size:0.9rem;"><strong>Arkusz "KPI_Matematyczne" (opcjonalnie):</strong></p>
+                    <code>KPI | Rok | Miesiac | Tydzien (opcja) | Wartosc | Target</code>
+                    <p style="color:#666;margin-top:5px;font-size:0.8rem;">Kody: TD-01, TD-02, TD-03, CS-02, CS-03, CS-04, IM-02, IM-05, DL-HR</p>
+                    
+                    <p style="color:#888;margin:15px 0 10px;font-size:0.9rem;"><strong>Arkusz "KPI_Opisowe" (opcjonalnie):</strong></p>
+                    <code>KPI | Rok | Miesiac | Opis | Status (green/yellow/red)</code>
+                    <p style="color:#666;margin-top:5px;font-size:0.8rem;">Kody: DD-01, CS-01</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Historia -->
+        <div class="tab-content" id="tab-historia">
+            <div class="upload-section" style="--section-color: #666;">
+                <div class="section-title"><span class="icon">📋</span> Historia importów</div>
+                <table class="history-table" id="historyTable">
+                    <thead><tr><th>Data</th><th>Panel</th><th>Plik</th><th>Rekordy</th><th>Okresy</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const files = { 'body-leasing': [], 'sprzedaz': [], 'rada-nadzorcza': [] };
+        const suffixes = { 'body-leasing': 'bl', 'sprzedaz': 'sp', 'rada-nadzorcza': 'rn' };
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                if (tab.dataset.tab === 'historia') loadHistory();
+            });
+        });
+        
+        // Setup dropzones
+        ['bl', 'sp', 'rn'].forEach(suffix => {
+            const panel = suffix === 'bl' ? 'body-leasing' : suffix === 'sp' ? 'sprzedaz' : 'rada-nadzorcza';
+            const dropzone = document.getElementById('dropzone-' + suffix);
+            const fileInput = document.getElementById('files-' + suffix);
+            
+            dropzone.addEventListener('click', () => fileInput.click());
+            dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+            dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                addFiles(panel, e.dataTransfer.files);
+            });
+            fileInput.addEventListener('change', e => addFiles(panel, e.target.files));
+        });
+        
+        function addFiles(panel, newFiles) {
+            const suffix = suffixes[panel];
+            files[panel] = [...files[panel], ...Array.from(newFiles)];
+            renderFiles(panel);
+        }
+        
+        function renderFiles(panel) {
+            const suffix = suffixes[panel];
+            const list = document.getElementById('filelist-' + suffix);
+            const btn = document.getElementById('uploadBtn-' + suffix);
+            
+            list.innerHTML = files[panel].map((f, i) => `
+                <div class="file-item">
+                    <span class="name">📄 ${f.name}</span>
+                    <span class="size">${(f.size / 1024).toFixed(1)} KB</span>
+                    <span class="remove" onclick="removeFile('${panel}', ${i})">&times;</span>
+                </div>
+            `).join('');
+            
+            btn.disabled = files[panel].length === 0;
+        }
+        
+        function removeFile(panel, index) {
+            files[panel].splice(index, 1);
+            renderFiles(panel);
+        }
+        
+        async function upload(panel) {
+            const suffix = suffixes[panel];
+            const btn = document.getElementById('uploadBtn-' + suffix);
+            const result = document.getElementById('result-' + suffix);
+            const password = document.getElementById('password').value;
+            
+            if (!password) { alert('Wprowadź hasło!'); return; }
+            if (files[panel].length === 0) return;
+            
+            btn.disabled = true;
+            btn.textContent = '⏳ Importuję...';
+            
+            const formData = new FormData();
+            formData.append('password', password);
+            files[panel].forEach(f => formData.append('files', f));
+            
+            try {
+                const res = await fetch('/admin/upload/' + panel, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                result.style.display = 'block';
+                if (res.ok) {
+                    result.className = 'result success';
+                    result.innerHTML = `<strong>✅ ${data.message}</strong>` + 
+                        (data.periods?.length ? `<br>Okresy: ${data.periods.map(p => 'T' + p.tydzien + '/' + p.rok).join(', ')}` : '');
+                    files[panel] = [];
+                    renderFiles(panel);
+                } else {
+                    result.className = 'result error';
+                    result.innerHTML = `<strong>❌ Błąd:</strong> ${data.error}`;
+                }
+            } catch (err) {
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `<strong>❌ Błąd:</strong> ${err.message}`;
+            }
+            
+            btn.disabled = files[panel].length === 0;
+            btn.textContent = '📤 Wgraj dane';
+        }
+        
+        async function loadHistory() {
+            const res = await fetch('/admin/history');
+            const data = await res.json();
+            
+            const tbody = document.querySelector('#historyTable tbody');
+            tbody.innerHTML = data.length === 0 ? '<tr><td colspan="5" style="text-align:center;color:#666;">Brak historii</td></tr>' : data.map(h => `
+                <tr>
+                    <td>${new Date(h.created_at).toLocaleString('pl')}</td>
+                    <td><span class="panel-badge ${h.panel || 'all'}">${h.panel || 'all'}</span></td>
+                    <td>${h.filename || '-'}</td>
+                    <td>${h.records_imported || 0}</td>
+                    <td style="color:#666;font-size:0.85rem;">${h.periods || '-'}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

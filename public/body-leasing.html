@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Leasing - MINDY | InfraMinds</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00e6a0;
+            --primary-dark: #00b37a;
+            --bg: #0a0a0f;
+            --card-bg: rgba(255,255,255,0.03);
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .logo a { color: inherit; text-decoration: none; }
+        .nav-links a { color: #888; text-decoration: none; margin-left: 20px; }
+        .nav-links a:hover { color: #fff; }
+        
+        .week-selector {
+            display: flex; gap: 10px; align-items: center; margin-bottom: 20px;
+        }
+        .week-selector select, .week-selector button {
+            padding: 10px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);
+            background: var(--card-bg); color: #fff; cursor: pointer;
+        }
+        .week-selector button { background: var(--primary); color: #000; font-weight: 600; }
+        
+        .robot-section {
+            display: flex; justify-content: center; margin-bottom: 30px;
+        }
+        .robot-card {
+            background: var(--card-bg); border-radius: 20px; padding: 30px 50px;
+            text-align: center; border: 2px solid var(--primary);
+        }
+        .robot-container { width: 150px; height: 150px; margin: 0 auto 15px; }
+        .robot-name { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .robot-mood { font-size: 1rem; color: #888; margin-top: 8px; }
+        .help-btn {
+            margin-top: 15px; padding: 10px 24px; background: var(--primary);
+            color: #000; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;
+        }
+        @media (max-width: 900px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+        .kpi-card {
+            background: var(--card-bg); border-radius: 12px; padding: 20px; text-align: center;
+        }
+        .kpi-label { font-size: 0.8rem; color: #888; margin-bottom: 8px; }
+        .kpi-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .kpi-target { font-size: 0.75rem; color: #555; margin-top: 4px; }
+        .kpi-percent { font-size: 0.9rem; margin-top: 8px; padding: 4px 10px; border-radius: 20px; display: inline-block; }
+        .kpi-percent.good { background: rgba(0,230,160,0.2); color: #00e6a0; }
+        .kpi-percent.warn { background: rgba(255,200,0,0.2); color: #ffc800; }
+        .kpi-percent.bad { background: rgba(255,80,80,0.2); color: #ff5050; }
+        
+        .tables-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        @media (max-width: 1000px) { .tables-section { grid-template-columns: 1fr; } }
+        .table-card { background: var(--card-bg); border-radius: 16px; padding: 20px; overflow-x: auto; }
+        .table-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; color: var(--primary); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .data-table th { color: #888; font-weight: 500; font-size: 0.85rem; }
+        .rank-badge { display: inline-flex; width: 28px; height: 28px; align-items: center; justify-content: center; border-radius: 50%; font-weight: 600; font-size: 0.85rem; }
+        .rank-1 { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; }
+        .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+        .rank-3 { background: linear-gradient(135deg, #cd7f32, #a0522d); color: #fff; }
+        .rank-other { background: rgba(255,255,255,0.1); color: #666; }
+        .stanowisko-badge { background: rgba(0,230,160,0.15); color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; }
+        .placement-cell.has { color: #00e6a0; font-weight: 700; }
+        .placement-cell.none { color: #555; }
+        
+        .hit-ratio-section { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 30px; }
+        .hit-ratio-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .hr-card { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; text-align: center; }
+        .hr-name { font-weight: 600; margin-bottom: 10px; }
+        .hr-value { font-size: 2rem; font-weight: 700; }
+        .hr-details { color: #666; font-size: 0.85rem; margin-top: 8px; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #1a1a2e; border-radius: 16px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-title { font-size: 1.3rem; font-weight: 600; color: var(--primary); }
+        .modal-close { background: none; border: none; color: #888; font-size: 1.5rem; cursor: pointer; }
+        .modal-content { line-height: 1.8; }
+        
+        footer { text-align: center; padding: 30px; color: #555; }
+        footer a { color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo"><a href="/">← InfraMinds</a> / Body Leasing</div>
+            <div class="nav-links">
+                <a href="/sprzedaz">Sprzedaż</a>
+                <a href="/rada-nadzorcza">Rada Nadzorcza</a>
+                <a href="/admin">Admin</a>
+            </div>
+        </header>
+        
+        <div class="week-selector">
+            <select id="weekSelect"></select>
+            <button onclick="loadData()">Odśwież</button>
+        </div>
+        
+        <div class="robot-section">
+            <div class="robot-card">
+                <div class="robot-container" id="robotContainer"></div>
+                <div class="robot-name">MINDY</div>
+                <div class="robot-mood" id="robotMood">Ładuję...</div>
+                <button class="help-btn" onclick="showHelp()">💬 Jak mogę pomóc?</button>
+            </div>
+        </div>
+        
+        <div class="kpi-grid" id="kpiGrid"></div>
+        
+        <div class="tables-section">
+            <div class="table-card">
+                <div class="table-title">👥 Ranking — Tydzień <span id="weekLabel"></span></div>
+                <table class="data-table" id="tableWeek">
+                    <thead>
+                        <tr><th>#</th><th>Imię</th><th>Rola</th><th>🏆</th><th>Reco</th><th>CV</th><th>Weryf</th><th>Dni</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="table-card">
+                <div class="table-title">📊 Ranking Average (per dzień)</div>
+                <table class="data-table" id="tableAvg">
+                    <thead>
+                        <tr><th>#</th><th>Imię</th><th>Rola</th><th>🏆 Tot</th><th>Reco/d</th><th>CV/d</th><th>Weryf/d</th><th>Tyg.</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="hit-ratio-section">
+            <div class="table-title">🎯 Delivery Leads — Hit Ratio</div>
+            <div class="hit-ratio-grid" id="hitRatioGrid"></div>
+        </div>
+        
+        <footer>MINDY © InfraMinds 2025 | <a href="/admin">Panel Admin</a></footer>
+    </div>
+    
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">💬 MINDY</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-content" id="helpContent">Ładuję...</div>
+        </div>
+    </div>
+    
+    <script>
+        let currentData = null;
+        
+        function createRobot(container, percent) {
+            const mood = getMood(percent);
+            const color = percent >= 85 ? '#00e6a0' : percent >= 70 ? '#ffc800' : '#ff5050';
+            
+            container.innerHTML = `
+                <svg viewBox="0 0 120 140" width="150" height="170">
+                    <defs>
+                        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                    </defs>
+                    <!-- Body -->
+                    <rect x="20" y="55" width="80" height="65" rx="15" fill="${color}" opacity="0.9" filter="url(#glow)"/>
+                    <!-- Head -->
+                    <rect x="30" y="20" width="60" height="50" rx="12" fill="${color}"/>
+                    <!-- Eyes -->
+                    <circle cx="45" cy="40" r="8" fill="#0a0a0f"/>
+                    <circle cx="75" cy="40" r="8" fill="#0a0a0f"/>
+                    ${mood.eyes}
+                    <!-- Mouth -->
+                    ${mood.mouth}
+                    <!-- Antenna -->
+                    <rect x="56" y="5" width="8" height="18" rx="4" fill="${color}"/>
+                    <circle cx="60" cy="5" r="6" fill="${percent >= 100 ? '#00ffcc' : color}"/>
+                    <!-- Arms -->
+                    <rect x="5" y="70" width="18" height="12" rx="6" fill="${color}"/>
+                    <rect x="97" y="70" width="18" height="12" rx="6" fill="${color}"/>
+                    <!-- Cheeks -->
+                    ${percent >= 85 ? '<circle cx="35" cy="50" r="5" fill="#ff9999" opacity="0.5"/><circle cx="85" cy="50" r="5" fill="#ff9999" opacity="0.5"/>' : ''}
+                </svg>
+            `;
+        }
+        
+        function getMood(percent) {
+            if (percent >= 120) return { emoji: '🤩', text: 'Jestem niesamowita!', eyes: '<circle cx="47" cy="38" r="3" fill="#fff"/><circle cx="77" cy="38" r="3" fill="#fff"/>', mouth: '<path d="M45 52 Q60 65 75 52" stroke="#0a0a0f" stroke-width="4" fill="none"/>' };
+            if (percent >= 100) return { emoji: '😊', text: 'Świetnie się spisujemy!', eyes: '<circle cx="47" cy="38" r="3" fill="#fff"/><circle cx="77" cy="38" r="3" fill="#fff"/>', mouth: '<path d="M48 52 Q60 60 72 52" stroke="#0a0a0f" stroke-width="3" fill="none"/>' };
+            if (percent >= 85) return { emoji: '🙂', text: 'Idzie dobrze!', eyes: '<circle cx="47" cy="38" r="3" fill="#fff"/><circle cx="77" cy="38" r="3" fill="#fff"/>', mouth: '<path d="M50 54 Q60 58 70 54" stroke="#0a0a0f" stroke-width="3" fill="none"/>' };
+            if (percent >= 70) return { emoji: '😐', text: 'Może być lepiej...', eyes: '<circle cx="47" cy="40" r="3" fill="#fff"/><circle cx="77" cy="40" r="3" fill="#fff"/>', mouth: '<line x1="50" y1="55" x2="70" y2="55" stroke="#0a0a0f" stroke-width="3"/>' };
+            if (percent >= 50) return { emoji: '😟', text: 'Potrzebuję wsparcia', eyes: '<circle cx="47" cy="42" r="2" fill="#fff"/><circle cx="77" cy="42" r="2" fill="#fff"/>', mouth: '<path d="M50 58 Q60 52 70 58" stroke="#0a0a0f" stroke-width="3" fill="none"/>' };
+            return { emoji: '😢', text: 'To trudny tydzień...', eyes: '<circle cx="47" cy="42" r="2" fill="#fff"/><circle cx="77" cy="42" r="2" fill="#fff"/>', mouth: '<path d="M48 60 Q60 52 72 60" stroke="#0a0a0f" stroke-width="3" fill="none"/>' };
+        }
+        
+        async function loadData() {
+            const select = document.getElementById('weekSelect');
+            const [rok, tydzien] = select.value.split('-');
+            
+            const res = await fetch(`/api/body-leasing?rok=${rok}&tydzien=${tydzien}`);
+            currentData = await res.json();
+            
+            document.getElementById('weekLabel').textContent = currentData.tydzien;
+            
+            // Calculate totals
+            const data = currentData.current.rekrutacja;
+            const tt = currentData.teamTargets;
+            const totals = {
+                weryfikacje: data.reduce((s, r) => s + (r.weryfikacje || 0), 0),
+                rekomendacje: data.reduce((s, r) => s + (r.rekomendacje || 0), 0),
+                cv_dodane: data.reduce((s, r) => s + (r.cv_dodane || 0), 0),
+                placements: data.reduce((s, r) => s + (r.placements || 0), 0)
+            };
+            
+            // Overall percent
+            const percents = [];
+            if (tt.weryfikacje > 0) percents.push(totals.weryfikacje / tt.weryfikacje * 100);
+            if (tt.rekomendacje > 0) percents.push(totals.rekomendacje / tt.rekomendacje * 100);
+            if (tt.cv_dodane > 0) percents.push(totals.cv_dodane / tt.cv_dodane * 100);
+            const overallPercent = percents.length > 0 ? percents.reduce((a, b) => a + b) / percents.length : 0;
+            
+            // Robot
+            createRobot(document.getElementById('robotContainer'), overallPercent);
+            const mood = getMood(overallPercent);
+            document.getElementById('robotMood').innerHTML = `${mood.emoji} ${mood.text} <br><small style="color:#666">${Math.round(overallPercent)}% targetu</small>`;
+            
+            // KPI Cards
+            const kpiGrid = document.getElementById('kpiGrid');
+            kpiGrid.innerHTML = `
+                ${kpiCard('Weryfikacje', totals.weryfikacje, tt.weryfikacje)}
+                ${kpiCard('Rekomendacje', totals.rekomendacje, tt.rekomendacje)}
+                ${kpiCard('CV do bazy', totals.cv_dodane, tt.cv_dodane)}
+                ${kpiCard('Placements', totals.placements, tt.placements)}
+            `;
+            
+            // Week table
+            renderWeekTable(data);
+            
+            // Average table
+            renderAvgTable(currentData.average);
+            
+            // Hit Ratio
+            renderHitRatio(currentData.current.hitRatio);
+        }
+        
+        function kpiCard(label, value, target) {
+            const pct = target > 0 ? Math.round(value / target * 100) : 0;
+            const cls = pct >= 100 ? 'good' : pct >= 70 ? 'warn' : 'bad';
+            return `
+                <div class="kpi-card">
+                    <div class="kpi-label">${label}</div>
+                    <div class="kpi-value">${value}</div>
+                    <div class="kpi-target">Target: ${target}</div>
+                    <div class="kpi-percent ${cls}">${pct}%</div>
+                </div>
+            `;
+        }
+        
+        function renderWeekTable(data) {
+            const sorted = [...data].sort((a, b) => {
+                if ((b.placements || 0) !== (a.placements || 0)) return (b.placements || 0) - (a.placements || 0);
+                if ((b.rekomendacje || 0) !== (a.rekomendacje || 0)) return (b.rekomendacje || 0) - (a.rekomendacje || 0);
+                return ((b.cv_dodane || 0) + (b.weryfikacje || 0)) - ((a.cv_dodane || 0) + (a.weryfikacje || 0));
+            });
+            
+            const tbody = document.querySelector('#tableWeek tbody');
+            tbody.innerHTML = sorted.length === 0 ? '<tr><td colspan="8" style="text-align:center;color:#666;">Brak danych</td></tr>' : sorted.map((r, i) => `
+                <tr>
+                    <td><span class="rank-badge ${i < 3 ? 'rank-' + (i + 1) : 'rank-other'}">${i + 1}</span></td>
+                    <td><strong>${r.imie}</strong></td>
+                    <td><span class="stanowisko-badge">${r.stanowisko}</span></td>
+                    <td class="placement-cell ${r.placements > 0 ? 'has' : 'none'}">${r.placements || 0}</td>
+                    <td>${r.rekomendacje || '-'}</td>
+                    <td>${r.cv_dodane || '-'}</td>
+                    <td>${r.weryfikacje || '-'}</td>
+                    <td style="color:#666">${r.dni_pracy || 5}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderAvgTable(data) {
+            const tbody = document.querySelector('#tableAvg tbody');
+            tbody.innerHTML = data.length === 0 ? '<tr><td colspan="8" style="text-align:center;color:#666;">Brak danych</td></tr>' : data.map((r, i) => `
+                <tr>
+                    <td><span class="rank-badge ${i < 3 ? 'rank-' + (i + 1) : 'rank-other'}">${i + 1}</span></td>
+                    <td><strong>${r.imie}</strong></td>
+                    <td><span class="stanowisko-badge">${r.stanowisko}</span></td>
+                    <td class="placement-cell ${r.total_placements > 0 ? 'has' : 'none'}">${r.total_placements || 0}</td>
+                    <td>${r.reco_per_day || '-'}</td>
+                    <td>${r.cv_per_day || '-'}</td>
+                    <td>${r.weryf_per_day || '-'}</td>
+                    <td style="color:#666">${r.tygodni || 0}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderHitRatio(data) {
+            const grid = document.getElementById('hitRatioGrid');
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak danych Hit Ratio za ten miesiąc</div>';
+                return;
+            }
+            grid.innerHTML = data.map(h => {
+                const color = h.hit_ratio >= 30 ? '#00e6a0' : h.hit_ratio >= 20 ? '#ffc800' : '#ff5050';
+                return `
+                    <div class="hr-card">
+                        <div class="hr-name">${h.imie}</div>
+                        <div class="hr-value" style="color:${color}">${h.hit_ratio}%</div>
+                        <div class="hr-details">${h.placements} / ${h.zamkniete_requesty} requestów</div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function showHelp() {
+            document.getElementById('helpModal').classList.add('active');
+            document.getElementById('helpContent').innerHTML = '<div style="text-align:center;color:#888;">⏳ Myślę...</div>';
+            
+            const res = await fetch('/api/help/body-leasing', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rok: currentData.rok, tydzien: currentData.tydzien })
+            });
+            const data = await res.json();
+            document.getElementById('helpContent').innerHTML = data.help || data.error || 'Brak odpowiedzi';
+        }
+        
+        function closeModal() {
+            document.getElementById('helpModal').classList.remove('active');
+        }
+        
+        async function init() {
+            const res = await fetch('/api/body-leasing');
+            const data = await res.json();
+            
+            const select = document.getElementById('weekSelect');
+            data.weeks.forEach(w => {
+                const opt = document.createElement('option');
+                opt.value = `${w.rok}-${w.tydzien}`;
+                opt.textContent = `Tydzień ${w.tydzien}/${w.rok}`;
+                if (w.rok === data.rok && w.tydzien === data.tydzien) opt.selected = true;
+                select.appendChild(opt);
+            });
+            
+            if (data.weeks.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = `${data.rok}-${data.tydzien}`;
+                opt.textContent = `Tydzień ${data.tydzien}/${data.rok}`;
+                select.appendChild(opt);
+            }
+            
+            loadData();
+        }
+        
+        init();
+    </script>
+</body>
+</html>

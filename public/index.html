@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfraMinds KPI Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0f0f1a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #00e6a0, #00b4d8, #9966ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 1.2rem;
+        }
+        
+        .panels-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            flex: 1;
+            align-items: stretch;
+        }
+        
+        @media (max-width: 1000px) {
+            .panels-grid { grid-template-columns: 1fr; }
+        }
+        
+        .panel-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 24px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .panel-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 0%, var(--glow-color) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .panel-card:hover::before { opacity: 0.15; }
+        
+        .panel-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent-color);
+            box-shadow: 0 20px 60px -20px var(--glow-color);
+        }
+        
+        .panel-card.body-leasing {
+            --accent-color: #00e6a0;
+            --glow-color: rgba(0, 230, 160, 0.5);
+        }
+        
+        .panel-card.sprzedaz {
+            --accent-color: #ff6b35;
+            --glow-color: rgba(255, 107, 53, 0.5);
+        }
+        
+        .panel-card.rada {
+            --accent-color: #9966ff;
+            --glow-color: rgba(153, 102, 255, 0.5);
+        }
+        
+        .panel-icon {
+            font-size: 80px;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .panel-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--accent-color);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .panel-desc {
+            color: #888;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .panel-robot {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .panel-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+        
+        .panel-btn {
+            margin-top: 30px;
+            padding: 16px 40px;
+            background: var(--accent-color);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .panel-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px -10px var(--glow-color);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        
+        footer a { color: #888; }
+        
+        /* Robot SVG animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .robot-float { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">InfraMinds</div>
+            <div class="subtitle">KPI Dashboard System</div>
+        </header>
+        
+        <div class="panels-grid">
+            <!-- Body Leasing Panel -->
+            <div class="panel-card body-leasing" onclick="location.href='/body-leasing'">
+                <div class="panel-icon">
+                    <svg class="robot-float" width="100" height="100" viewBox="0 0 100 100">
+                        <!-- MINDY Robot -->
+                        <rect x="20" y="30" width="60" height="50" rx="10" fill="#00e6a0" opacity="0.9"/>
+                        <rect x="30" y="15" width="40" height="35" rx="8" fill="#00e6a0"/>
+                        <circle cx="40" cy="30" r="6" fill="#0a0a0f"/>
+                        <circle cx="60" cy="30" r="6" fill="#0a0a0f"/>
+                        <circle cx="42" cy="28" r="2" fill="#fff"/>
+                        <circle cx="62" cy="28" r="2" fill="#fff"/>
+                        <path d="M42 40 Q50 48 58 40" stroke="#0a0a0f" stroke-width="3" fill="none" stroke-linecap="round"/>
+                        <rect x="48" y="5" width="4" height="12" rx="2" fill="#00e6a0"/>
+                        <circle cx="50" cy="5" r="4" fill="#00ffcc"/>
+                        <rect x="10" y="45" width="12" height="8" rx="4" fill="#00e6a0"/>
+                        <rect x="78" y="45" width="12" height="8" rx="4" fill="#00e6a0"/>
+                    </svg>
+                </div>
+                <div class="panel-title">Body Leasing</div>
+                <div class="panel-desc">
+                    Dashboard rekrutacji z asystentką MINDY. 
+                    Śledź KPI Sourcerów, Rekruterów i TAC.
+                </div>
+                <div class="panel-features">
+                    <span class="feature-tag">Sourcerzy</span>
+                    <span class="feature-tag">Rekruterzy</span>
+                    <span class="feature-tag">TAC</span>
+                    <span class="feature-tag">Placements</span>
+                </div>
+                <button class="panel-btn">Otwórz Panel</button>
+            </div>
+            
+            <!-- Sprzedaż Panel -->
+            <div class="panel-card sprzedaz" onclick="location.href='/sprzedaz'">
+                <div class="panel-icon">
+                    <svg class="robot-float" width="100" height="100" viewBox="0 0 100 100" style="animation-delay: 0.5s;">
+                        <!-- INFRON Robot -->
+                        <rect x="20" y="30" width="60" height="50" rx="10" fill="#ff6b35" opacity="0.9"/>
+                        <rect x="30" y="15" width="40" height="35" rx="8" fill="#ff6b35"/>
+                        <rect x="34" y="24" width="12" height="8" rx="2" fill="#0a0a0f"/>
+                        <rect x="54" y="24" width="12" height="8" rx="2" fill="#0a0a0f"/>
+                        <rect x="36" cy="26" width="4" height="4" fill="#fff"/>
+                        <rect x="56" cy="26" width="4" height="4" fill="#fff"/>
+                        <rect x="40" y="38" width="20" height="4" rx="2" fill="#0a0a0f"/>
+                        <rect x="48" y="5" width="4" height="12" rx="2" fill="#ff6b35"/>
+                        <circle cx="50" cy="5" r="4" fill="#ff9500"/>
+                        <rect x="10" y="45" width="12" height="8" rx="4" fill="#ff6b35"/>
+                        <rect x="78" y="45" width="12" height="8" rx="4" fill="#ff6b35"/>
+                    </svg>
+                </div>
+                <div class="panel-title">Sprzedaż</div>
+                <div class="panel-desc">
+                    Dashboard sprzedaży z asystentem INFRON. 
+                    Monitoruj MRR, leady i oferty.
+                </div>
+                <div class="panel-features">
+                    <span class="feature-tag">SDR</span>
+                    <span class="feature-tag">BDM</span>
+                    <span class="feature-tag">Head of Tech</span>
+                    <span class="feature-tag">MRR</span>
+                </div>
+                <button class="panel-btn">Otwórz Panel</button>
+            </div>
+            
+            <!-- Rada Nadzorcza Panel -->
+            <div class="panel-card rada" onclick="location.href='/rada-nadzorcza'">
+                <div class="panel-icon">
+                    <svg class="robot-float" width="100" height="100" viewBox="0 0 100 100" style="animation-delay: 1s;">
+                        <!-- Board/Crown icon -->
+                        <path d="M20 70 L30 40 L50 55 L70 40 L80 70 Z" fill="#9966ff" opacity="0.9"/>
+                        <circle cx="30" cy="35" r="6" fill="#9966ff"/>
+                        <circle cx="50" cy="25" r="8" fill="#9966ff"/>
+                        <circle cx="70" cy="35" r="6" fill="#9966ff"/>
+                        <rect x="25" y="70" width="50" height="15" rx="4" fill="#9966ff"/>
+                        <circle cx="35" cy="77" r="4" fill="#0a0a0f"/>
+                        <circle cx="50" cy="77" r="4" fill="#0a0a0f"/>
+                        <circle cx="65" cy="77" r="4" fill="#0a0a0f"/>
+                    </svg>
+                </div>
+                <div class="panel-title">Rada Nadzorcza</div>
+                <div class="panel-desc">
+                    Kompleksowy przegląd KPI dla Delivery Lead. 
+                    Hit Ratio, metryki jakościowe i opisowe.
+                </div>
+                <div class="panel-features">
+                    <span class="feature-tag">Hit Ratio</span>
+                    <span class="feature-tag">KPI Opisowe</span>
+                    <span class="feature-tag">KPI Matematyczne</span>
+                </div>
+                <button class="panel-btn">Otwórz Panel</button>
+            </div>
+        </div>
+        
+        <footer>
+            InfraMinds © 2025 | <a href="/admin">Panel Administracyjny</a>
+        </footer>
+    </div>
+</body>
+</html>
