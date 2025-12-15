@@ -301,7 +301,122 @@
         .data-week-delete:hover {
             background: rgba(255, 107, 107, 0.2);
         }
-        
+
+        /* Login Modal */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 11, 16, 0.98);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-modal {
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+
+        .login-modal h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #4da6ff, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-modal .subtitle {
+            margin-bottom: 24px;
+        }
+
+        .login-modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-error {
+            color: #ff6b6b;
+            font-size: 0.85rem;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .login-error.active {
+            display: block;
+        }
+
+        /* Checkbox for weeks */
+        .week-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #4da6ff;
+        }
+
+        .bulk-delete-bar {
+            display: none;
+            padding: 16px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bulk-delete-bar.active {
+            display: flex;
+        }
+
+        .bulk-delete-info {
+            color: #ff8c8c;
+            font-size: 0.9rem;
+        }
+
+        .bulk-delete-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8c8c);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bulk-delete-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .select-all-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(77, 166, 255, 0.1);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(77, 166, 255, 0.2);
+        }
+
+        .select-all-row label {
+            margin: 0;
+            color: #4da6ff;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
         /* History */
         .history-item {
             display: flex;
@@ -320,25 +435,36 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-modal">
+            <h2>🔐 Panel Administracyjny</h2>
+            <p class="subtitle">Wprowadź hasło aby kontynuować</p>
+            <div class="form-group">
+                <input type="password" id="loginPassword" placeholder="Hasło administratora" onkeypress="if(event.key==='Enter') attemptLogin()">
+            </div>
+            <button class="primary" onclick="attemptLogin()">
+                <span>🔓</span> Zaloguj się
+            </button>
+            <div class="login-error" id="loginError">Nieprawidłowe hasło</div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent" style="display: none;">
         <a href="/" class="back-link">← Powrót do Dashboard</a>
-        
+
         <h1>🤖 Panel Administracyjny</h1>
         <p class="subtitle">Upload danych i zarządzanie</p>
-        
-        <!-- Auth -->
+
+        <!-- Period selector -->
         <div class="card">
-            <div class="form-row">
+            <div class="form-row" style="grid-template-columns: 1fr 1fr;">
                 <div class="form-group">
-                    <label>🔑 Hasło</label>
-                    <input type="password" id="password" placeholder="Hasło administratora">
-                </div>
-                <div class="form-group">
-                    <label>📅 Tydzień (do usuwania)</label>
+                    <label>📅 Tydzień (do usuwania pojedynczego)</label>
                     <input type="number" id="tydzien" min="1" max="53">
                 </div>
                 <div class="form-group">
-                    <label>📆 Rok (do usuwania)</label>
+                    <label>📆 Rok (do usuwania pojedynczego)</label>
                     <input type="number" id="rok" min="2020" max="2030">
                 </div>
             </div>
@@ -403,21 +529,31 @@
         <!-- Manage Tab -->
         <div class="tab-content" id="tab-manage">
             <div class="card">
-                <div class="card-title">🗑️ Usuń dane z tygodnia</div>
+                <div class="card-title">🗑️ Usuń dane z pojedynczego tygodnia</div>
                 <p style="font-size: 0.85rem; color: #888; margin-bottom: 16px;">
                     Wybierz tydzień powyżej i kliknij "Usuń dane" aby skasować wszystkie dane z tego tygodnia.
                 </p>
-                
+
                 <button class="primary danger" onclick="deleteWeekData()">
                     <span>🗑️</span> Usuń dane z wybranego tygodnia
                 </button>
-                
+
                 <div id="deleteResult"></div>
             </div>
-            
+
             <div class="card">
                 <div class="card-title">📊 Zapisane tygodnie</div>
+
+                <!-- Bulk delete bar -->
+                <div class="bulk-delete-bar" id="bulkDeleteBar">
+                    <span class="bulk-delete-info">Zaznaczono: <strong id="selectedCount">0</strong> tygodni</span>
+                    <button class="bulk-delete-btn" onclick="bulkDeleteSelected()">
+                        🗑️ Usuń zaznaczone
+                    </button>
+                </div>
+
                 <div id="savedWeeks">Ładowanie...</div>
+                <div id="bulkDeleteResult"></div>
             </div>
         </div>
         
@@ -431,18 +567,57 @@
     </div>
 
     <script>
-        // Set defaults
-        const now = new Date();
-        document.getElementById('rok').value = now.getFullYear();
-        document.getElementById('tydzien').value = getWeekNumber(now);
-        
+        // Stored password after login
+        let adminPassword = '';
+        let selectedWeeks = new Set();
+
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
             const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
             return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
         }
-        
+
+        // Login functionality
+        async function attemptLogin() {
+            const password = document.getElementById('loginPassword').value;
+            if (!password) {
+                document.getElementById('loginError').classList.add('active');
+                document.getElementById('loginError').textContent = 'Wprowadź hasło';
+                return;
+            }
+
+            // Verify password with server
+            try {
+                const response = await fetch('/admin/verify-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+
+                if (response.ok) {
+                    adminPassword = password;
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+
+                    // Set defaults
+                    const now = new Date();
+                    document.getElementById('rok').value = now.getFullYear();
+                    document.getElementById('tydzien').value = getWeekNumber(now);
+
+                    // Load data
+                    loadHistory();
+                    loadSavedWeeks();
+                } else {
+                    document.getElementById('loginError').classList.add('active');
+                    document.getElementById('loginError').textContent = 'Nieprawidłowe hasło';
+                }
+            } catch (err) {
+                document.getElementById('loginError').classList.add('active');
+                document.getElementById('loginError').textContent = 'Błąd połączenia';
+            }
+        }
+
         // Tabs
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -452,32 +627,32 @@
                 document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
             });
         });
-        
+
         // File handling
         let selectedFiles = [];
-        
+
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const fileList = document.getElementById('fileList');
         const uploadBtn = document.getElementById('uploadBtn');
-        
+
         dropZone.addEventListener('click', () => fileInput.click());
-        
+
         dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('dragover');
         });
-        
+
         dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-        
+
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('dragover');
             handleFiles(e.dataTransfer.files);
         });
-        
+
         fileInput.addEventListener('change', () => handleFiles(fileInput.files));
-        
+
         function handleFiles(files) {
             for (const file of files) {
                 if (!selectedFiles.find(f => f.name === file.name)) {
@@ -486,14 +661,14 @@
             }
             renderFileList();
         }
-        
+
         function renderFileList() {
             if (selectedFiles.length === 0) {
                 fileList.innerHTML = '';
                 uploadBtn.disabled = true;
                 return;
             }
-            
+
             fileList.innerHTML = selectedFiles.map((file, idx) => `
                 <div class="file-item">
                     <div class="file-icon">📄</div>
@@ -504,60 +679,58 @@
                     <button class="file-remove" onclick="removeFile(${idx})">✕</button>
                 </div>
             `).join('');
-            
+
             uploadBtn.disabled = false;
         }
-        
+
         function removeFile(idx) {
             selectedFiles.splice(idx, 1);
             renderFileList();
         }
-        
+
         function formatSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
-        
+
         // Upload
         uploadBtn.addEventListener('click', async () => {
-            const password = document.getElementById('password').value;
             const rok = document.getElementById('rok').value;
             const tydzien = document.getElementById('tydzien').value;
-            
-            if (!password) return alert('Wprowadź hasło');
+
             if (selectedFiles.length === 0) return alert('Wybierz pliki');
-            
+
             document.getElementById('loading').classList.add('active');
             document.getElementById('uploadResult').innerHTML = '';
             uploadBtn.disabled = true;
-            
+
             const formData = new FormData();
-            formData.append('password', password);
+            formData.append('password', adminPassword);
             formData.append('rok', rok);
             formData.append('tydzien', tydzien);
             selectedFiles.forEach(file => formData.append('files', file));
-            
+
             try {
                 const response = await fetch('/admin/upload', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 const result = await response.json();
                 document.getElementById('loading').classList.remove('active');
-                
+
                 if (response.ok) {
                     let html = `<div class="result-card success">
                         <strong>✅ ${result.message}</strong>
                         <div class="result-details">${result.summary || ''}</div>
                     `;
-                    
+
                     if (result.periods && result.periods.length > 0) {
-                        html += '<div class="result-details" style="color: #4da6ff;">📅 Okresy: ' + 
+                        html += '<div class="result-details" style="color: #4da6ff;">📅 Okresy: ' +
                             result.periods.map(p => `T${p.tydzien}/${p.rok}`).join(', ') + '</div>';
                     }
-                    
+
                     if (result.details && result.details.length > 0) {
                         html += '<div class="result-details">';
                         result.details.forEach(d => {
@@ -565,14 +738,14 @@
                         });
                         html += '</div>';
                     }
-                    
+
                     if (result.warnings && result.warnings.length > 0) {
                         html += '<div class="result-details" style="color: #ffd54f;">⚠️ ' + result.warnings.join('<br>') + '</div>';
                     }
-                    
+
                     html += '</div>';
                     document.getElementById('uploadResult').innerHTML = html;
-                    
+
                     selectedFiles = [];
                     renderFileList();
                     loadHistory();
@@ -582,36 +755,33 @@
                         <div class="result-card error">❌ ${result.error}</div>
                     `;
                 }
-                
+
             } catch (err) {
                 document.getElementById('loading').classList.remove('active');
                 document.getElementById('uploadResult').innerHTML = `
                     <div class="result-card error">❌ Błąd połączenia: ${err.message}</div>
                 `;
             }
-            
+
             uploadBtn.disabled = selectedFiles.length === 0;
         });
-        
-        // Delete week data
+
+        // Delete single week data
         async function deleteWeekData() {
-            const password = document.getElementById('password').value;
             const rok = document.getElementById('rok').value;
             const tydzien = document.getElementById('tydzien').value;
-            
-            if (!password) return alert('Wprowadź hasło');
-            
+
             if (!confirm(`Czy na pewno chcesz usunąć wszystkie dane z tygodnia ${tydzien}/${rok}?`)) {
                 return;
             }
-            
+
             try {
-                const response = await fetch(`/admin/data/${rok}/${tydzien}?password=${encodeURIComponent(password)}`, {
+                const response = await fetch(`/admin/data/${rok}/${tydzien}?password=${encodeURIComponent(adminPassword)}`, {
                     method: 'DELETE'
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (response.ok) {
                     document.getElementById('deleteResult').innerHTML = `
                         <div class="result-card success">✅ ${result.message}</div>
@@ -622,50 +792,149 @@
                         <div class="result-card error">❌ ${result.error}</div>
                     `;
                 }
-                
+
             } catch (err) {
                 document.getElementById('deleteResult').innerHTML = `
                     <div class="result-card error">❌ Błąd: ${err.message}</div>
                 `;
             }
         }
-        
-        // Load saved weeks
+
+        // Week selection handling
+        function toggleWeekSelection(rok, tydzien) {
+            const key = `${rok}-${tydzien}`;
+            if (selectedWeeks.has(key)) {
+                selectedWeeks.delete(key);
+            } else {
+                selectedWeeks.add(key);
+            }
+            updateBulkDeleteBar();
+        }
+
+        function toggleSelectAll(checked, weeks) {
+            selectedWeeks.clear();
+            if (checked) {
+                weeks.forEach(w => selectedWeeks.add(`${w.rok}-${w.tydzien}`));
+            }
+            // Update all checkboxes
+            document.querySelectorAll('.week-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+            updateBulkDeleteBar();
+        }
+
+        function updateBulkDeleteBar() {
+            const bar = document.getElementById('bulkDeleteBar');
+            const count = document.getElementById('selectedCount');
+            count.textContent = selectedWeeks.size;
+            if (selectedWeeks.size > 0) {
+                bar.classList.add('active');
+            } else {
+                bar.classList.remove('active');
+            }
+        }
+
+        // Bulk delete
+        async function bulkDeleteSelected() {
+            if (selectedWeeks.size === 0) return;
+
+            const weeksToDelete = Array.from(selectedWeeks).map(key => {
+                const [rok, tydzien] = key.split('-');
+                return { rok: parseInt(rok), tydzien: parseInt(tydzien) };
+            });
+
+            const weeksList = weeksToDelete.map(w => `T${w.tydzien}/${w.rok}`).join(', ');
+            if (!confirm(`Czy na pewno chcesz usunąć dane z ${selectedWeeks.size} tygodni?\n\n${weeksList}`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/data/bulk', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        password: adminPassword,
+                        weeks: weeksToDelete
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('bulkDeleteResult').innerHTML = `
+                        <div class="result-card success" style="margin-top: 16px;">✅ ${result.message}</div>
+                    `;
+                    selectedWeeks.clear();
+                    updateBulkDeleteBar();
+                    loadSavedWeeks();
+                } else {
+                    document.getElementById('bulkDeleteResult').innerHTML = `
+                        <div class="result-card error" style="margin-top: 16px;">❌ ${result.error}</div>
+                    `;
+                }
+
+            } catch (err) {
+                document.getElementById('bulkDeleteResult').innerHTML = `
+                    <div class="result-card error" style="margin-top: 16px;">❌ Błąd: ${err.message}</div>
+                `;
+            }
+        }
+
+        // Load saved weeks with checkboxes
+        let allWeeks = [];
         async function loadSavedWeeks() {
             try {
                 const response = await fetch('/api/dashboard');
                 const data = await response.json();
-                
+
                 if (!data.weeks || data.weeks.length === 0) {
                     document.getElementById('savedWeeks').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak zapisanych danych</div>';
                     return;
                 }
-                
-                document.getElementById('savedWeeks').innerHTML = data.weeks.slice(0, 20).map(w => `
+
+                allWeeks = data.weeks.slice(0, 50);
+
+                let html = `
+                    <div class="select-all-row">
+                        <input type="checkbox" class="week-checkbox" id="selectAll" onchange="toggleSelectAll(this.checked, allWeeks)">
+                        <label for="selectAll">Zaznacz wszystkie</label>
+                    </div>
+                `;
+
+                html += allWeeks.map(w => {
+                    const key = `${w.rok}-${w.tydzien}`;
+                    const isChecked = selectedWeeks.has(key) ? 'checked' : '';
+                    return `
                     <div class="data-week-item">
+                        <input type="checkbox" class="week-checkbox" ${isChecked}
+                            onchange="toggleWeekSelection(${w.rok}, ${w.tydzien})">
                         <div>📅</div>
                         <div class="data-week-info">
                             <div class="data-week-title">Tydzień ${w.tydzien} / ${w.rok}</div>
                         </div>
                     </div>
-                `).join('');
-                
+                `;
+                }).join('');
+
+                document.getElementById('savedWeeks').innerHTML = html;
+                updateBulkDeleteBar();
+
             } catch (err) {
                 document.getElementById('savedWeeks').innerHTML = '<div style="color:#ff6b6b;">Błąd ładowania</div>';
             }
         }
-        
+
         // Load history
         async function loadHistory() {
             try {
                 const response = await fetch('/admin/history');
                 const history = await response.json();
-                
+
                 if (history.length === 0) {
                     document.getElementById('history').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak importów</div>';
                     return;
                 }
-                
+
                 document.getElementById('history').innerHTML = history.slice(0, 20).map(h => {
                     const date = new Date(h.created_at);
                     return `
@@ -678,14 +947,14 @@
                         </div>
                     `;
                 }).join('');
-                
+
             } catch (err) {
                 document.getElementById('history').innerHTML = '<div style="color:#ff6b6b;">Błąd ładowania</div>';
             }
         }
-        
-        loadHistory();
-        loadSavedWeeks();
+
+        // Focus on password input when page loads
+        document.getElementById('loginPassword').focus();
     </script>
 </body>
 </html>

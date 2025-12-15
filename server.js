@@ -695,23 +695,63 @@ app.post('/api/help/:dzial', async (req, res) => {
     res.json(result);
 });
 
-// Delete week
+// Verify password
+app.post('/admin/verify-password', (req, res) => {
+    if (req.body.password === ADMIN_PASSWORD) {
+        res.json({ success: true });
+    } else {
+        res.status(401).json({ error: 'Nieprawidłowe hasło' });
+    }
+});
+
+// Delete single week
 app.delete('/admin/data/:rok/:tydzien', (req, res) => {
     if (req.query.password !== ADMIN_PASSWORD) {
         return res.status(401).json({ error: 'Nieprawidłowe hasło' });
     }
-    
+
     const rok = parseInt(req.params.rok);
     const tydzien = parseInt(req.params.tydzien);
-    
+
     const tydzienRow = db.prepare('SELECT id FROM tygodnie WHERE rok = ? AND tydzien = ?').get(rok, tydzien);
     if (!tydzienRow) return res.status(404).json({ error: 'Brak danych' });
-    
+
     const deleted = db.prepare('DELETE FROM kpi_rekrutacja WHERE tydzien_id = ?').run(tydzienRow.id).changes +
                     db.prepare('DELETE FROM kpi_sprzedaz WHERE tydzien_id = ?').run(tydzienRow.id).changes;
     db.prepare('DELETE FROM analizy WHERE tydzien_id = ?').run(tydzienRow.id);
-    
+
     res.json({ success: true, message: `Usunięto ${deleted} rekordów` });
+});
+
+// Bulk delete weeks
+app.delete('/admin/data/bulk', (req, res) => {
+    if (req.body.password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: 'Nieprawidłowe hasło' });
+    }
+
+    const weeks = req.body.weeks;
+    if (!weeks || !Array.isArray(weeks) || weeks.length === 0) {
+        return res.status(400).json({ error: 'Brak tygodni do usunięcia' });
+    }
+
+    let totalDeleted = 0;
+    let weeksDeleted = 0;
+
+    weeks.forEach(({ rok, tydzien }) => {
+        const tydzienRow = db.prepare('SELECT id FROM tygodnie WHERE rok = ? AND tydzien = ?').get(rok, tydzien);
+        if (tydzienRow) {
+            const deleted = db.prepare('DELETE FROM kpi_rekrutacja WHERE tydzien_id = ?').run(tydzienRow.id).changes +
+                            db.prepare('DELETE FROM kpi_sprzedaz WHERE tydzien_id = ?').run(tydzienRow.id).changes;
+            db.prepare('DELETE FROM analizy WHERE tydzien_id = ?').run(tydzienRow.id);
+            totalDeleted += deleted;
+            weeksDeleted++;
+        }
+    });
+
+    res.json({
+        success: true,
+        message: `Usunięto ${totalDeleted} rekordów z ${weeksDeleted} tygodni`
+    });
 });
 
 // History
