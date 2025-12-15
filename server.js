@@ -401,7 +401,7 @@ WAŻNE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-opus-20240229', // Switched to Opus for better availability
+                model: 'claude-3-haiku-20240307', // Switched to Haiku for best availability
                 max_tokens: 4096,
                 messages: [{ role: 'user', content: prompt }]
             })
@@ -522,7 +522,7 @@ SUMY vs TARGETY ZESPOŁOWE:
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-opus-20240229',
+                model: 'claude-3-haiku-20240307',
                 max_tokens: 600,
                 messages: [{
                     role: 'user',
@@ -605,7 +605,7 @@ async function generateFullAnalysis(rok, tydzien) {
                 'anthropic-version': '2023-06-01'
             },
             body: JSON.stringify({
-                model: 'claude-3-opus-20240229',
+                model: 'claude-3-haiku-20240307',
                 max_tokens: 1000,
                 messages: [{
                     role: 'user',
