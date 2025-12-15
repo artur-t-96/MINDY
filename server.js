@@ -409,80 +409,104 @@ WAŻNE:
 - Odpowiedź musi być kompletnym, poprawnym JSON - upewnij się że wszystkie nawiasy są zamknięte
 - Jeśli danych jest dużo, skup się na najważniejszych (pierwsze 50 rekordów)`;
 
-    try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': ANTHROPIC_API_KEY,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
-                max_tokens: 4096,  // Haiku max limit; jsonrepair handles truncation
-                messages: [{ role: 'user', content: prompt }]
-            })
-        });
+    // Retry logic for API calls
+    const maxRetries = 3;
+    let lastError = null;
 
-        const result = await response.json();
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            console.log(`API call attempt ${attempt}/${maxRetries}...`);
 
-        if (!response.ok) {
-            console.error('Anthropic API Error:', result);
-            return { error: `Błąd API AI (${response.status}): ${result.error?.message || result.error?.type || 'Nieznany błąd'}` };
-        }
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': ANTHROPIC_API_KEY,
+                    'anthropic-version': '2023-06-01'
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-haiku-20240307',
+                    max_tokens: 4096,
+                    messages: [{ role: 'user', content: prompt }]
+                })
+            });
 
-        if (result.content && result.content[0]) {
-            let jsonText = result.content[0].text;
-            console.log("AI Response length:", jsonText.length);
-            const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+            const result = await response.json();
 
-            if (jsonMatch) {
-                jsonText = jsonMatch[0];
-                try {
-                    const parsed = JSON.parse(jsonText);
-                    console.log("JSON parsed successfully. Records:", parsed.detected_data?.length || 0);
-                    return parsed;
-                } catch (parseErr) {
-                    console.log("JSON Parse Error. Attempting repair with jsonrepair...");
-                    console.log("First 500 chars:", jsonText.substring(0, 500));
-                    console.log("Last 500 chars:", jsonText.substring(jsonText.length - 500));
+            // Retry on 529 (overloaded) or 529 errors
+            if (response.status === 529 || response.status === 503) {
+                console.log(`API overloaded (${response.status}), retrying in ${attempt * 2}s...`);
+                lastError = `API przeciążone (${response.status}). Próba ${attempt}/${maxRetries}`;
+                await new Promise(r => setTimeout(r, attempt * 2000));
+                continue;
+            }
 
-                    // Use jsonrepair library for robust JSON repair
+            if (!response.ok) {
+                console.error('Anthropic API Error:', result);
+                return { error: `Błąd API AI (${response.status}): ${result.error?.message || result.error?.type || 'Nieznany błąd'}` };
+            }
+
+            if (result.content && result.content[0]) {
+                let jsonText = result.content[0].text;
+                console.log("AI Response length:", jsonText.length);
+                const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+
+                if (jsonMatch) {
+                    jsonText = jsonMatch[0];
                     try {
-                        const repairedJson = jsonrepair(jsonText);
-                        console.log("JSON successfully repaired");
-                        return JSON.parse(repairedJson);
-                    } catch (repairErr) {
-                        console.log("jsonrepair failed, trying manual repair...");
+                        const parsed = JSON.parse(jsonText);
+                        console.log("JSON parsed successfully. Records:", parsed.detected_data?.length || 0);
+                        return parsed;
+                    } catch (parseErr) {
+                        console.log("JSON Parse Error. Attempting repair with jsonrepair...");
+                        console.log("First 500 chars:", jsonText.substring(0, 500));
+                        console.log("Last 500 chars:", jsonText.substring(jsonText.length - 500));
 
-                        // Fallback: Try to cut off at the last valid closing sequence
-                        const lastBrace = jsonText.lastIndexOf('}');
-                        const lastBracket = jsonText.lastIndexOf(']');
-                        const lastValidChar = Math.max(lastBrace, lastBracket);
+                        // Use jsonrepair library for robust JSON repair
+                        try {
+                            const repairedJson = jsonrepair(jsonText);
+                            console.log("JSON successfully repaired");
+                            return JSON.parse(repairedJson);
+                        } catch (repairErr) {
+                            console.log("jsonrepair failed, trying manual repair...");
 
-                        if (lastValidChar !== -1) {
-                            try {
-                                const truncated = jsonText.substring(0, lastValidChar + 1);
-                                const repairedTruncated = jsonrepair(truncated);
-                                return JSON.parse(repairedTruncated);
-                            } catch (e) { /* ignore */ }
+                            // Fallback: Try to cut off at the last valid closing sequence
+                            const lastBrace = jsonText.lastIndexOf('}');
+                            const lastBracket = jsonText.lastIndexOf(']');
+                            const lastValidChar = Math.max(lastBrace, lastBracket);
+
+                            if (lastValidChar !== -1) {
+                                try {
+                                    const truncated = jsonText.substring(0, lastValidChar + 1);
+                                    const repairedTruncated = jsonrepair(truncated);
+                                    return JSON.parse(repairedTruncated);
+                                } catch (e) { /* ignore */ }
+                            }
+
+                            console.error("All JSON repair attempts failed. Original text length:", jsonText.length);
+                            console.error("Parse error:", parseErr.message);
+
+                            return {
+                                error: 'Otrzymano niepełne dane od AI (JSON Error). Spróbuj wgrać mniej plików naraz lub plik z mniejszą ilością danych.',
+                                details: parseErr.message
+                            };
                         }
-
-                        console.error("All JSON repair attempts failed. Original text length:", jsonText.length);
-                        console.error("Parse error:", parseErr.message);
-
-                        return {
-                            error: 'Otrzymano niepełne dane od AI (JSON Error). Spróbuj wgrać mniej plików naraz lub plik z mniejszą ilością danych.',
-                            details: parseErr.message
-                        };
                     }
                 }
             }
+            return { error: 'Nie udało się przeanalizować odpowiedzi (brak contentu)' };
+
+        } catch (err) {
+            console.log(`API call attempt ${attempt} failed: ${err.message}`);
+            lastError = err.message;
+            if (attempt < maxRetries) {
+                await new Promise(r => setTimeout(r, attempt * 2000));
+            }
         }
-        return { error: 'Nie udało się przeanalizować odpowiedzi (brak contentu)' };
-    } catch (err) {
-        return { error: `Błąd połączenia: ${err.message}` };
     }
+
+    // All retries failed
+    return { error: `Błąd połączenia po ${maxRetries} próbach: ${lastError}` };
 }
 
 async function generateDepartmentHelp(dzial, rok, tydzien) {
