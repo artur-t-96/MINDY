@@ -402,12 +402,18 @@ WAŻNE:
             },
             body: JSON.stringify({
                 model: 'claude-3-5-sonnet-20240620', // Changed model to latest Sonnet 3.5 which supports output tokens
-                max_tokens: 8192,
+                max_tokens: 4096,
                 messages: [{ role: 'user', content: prompt }]
             })
         });
 
         const result = await response.json();
+
+        if (!response.ok) {
+            console.error('Anthropic API Error:', result);
+            return { error: `Błąd API AI (${response.status}): ${result.error?.message || result.error?.type || 'Nieznany błąd'}` };
+        }
+
         if (result.content && result.content[0]) {
             let jsonText = result.content[0].text;
             const jsonMatch = jsonText.match(/\{[\s\S]*\}/);
@@ -442,9 +448,9 @@ WAŻNE:
                 }
             }
         }
-        return { error: 'Nie udało się przeanalizować odpowiedzi' };
+        return { error: 'Nie udało się przeanalizować odpowiedzi (brak contentu)' };
     } catch (err) {
-        return { error: err.message };
+        return { error: `Błąd połączenia: ${err.message}` };
     }
 }
 
