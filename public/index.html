@@ -772,139 +772,7 @@
             return 'status-bad';
         }
 
-        function createRobotSVG(containerId, kpiData, type) {
-            const container = document.getElementById(containerId);
-            const isMindy = type === 'mindy';
-            const primaryColor = isMindy ? '#4da6ff' : '#ff8c42';
-            const secondaryColor = isMindy ? '#66b3ff' : '#ffaa66';
 
-            // Calculate colors based on KPI performance
-            const getColor = (percent) => {
-                if (percent >= 100) return '#00e6a0';
-                if (percent >= 70) return '#ffd54f';
-                return '#ff6b6b';
-            };
-
-            const eyeColor = getColor(kpiData.eye || 80);
-            const brainColor = getColor(kpiData.brain || 80);
-            const heartColor = getColor(kpiData.heart || 80);
-            const legsColor = getColor(kpiData.legs || 80);
-            const handsColor = getColor(kpiData.hands || 80);
-
-            const allGood = Object.values(kpiData).every(v => v >= 100);
-
-            container.innerHTML = `
-                <defs>
-                    <linearGradient id="bodyGrad-${type}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#1a1a24"/>
-                        <stop offset="100%" stop-color="#0d0d14"/>
-                    </linearGradient>
-                    <linearGradient id="accentGrad-${type}" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="${primaryColor}"/>
-                        <stop offset="100%" stop-color="${secondaryColor}"/>
-                    </linearGradient>
-                    <filter id="glow-${type}">
-                        <feGaussianBlur stdDeviation="3" result="blur"/>
-                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                </defs>
-                
-                <!-- Shadow -->
-                <ellipse cx="100" cy="310" rx="50" ry="8" fill="${primaryColor}" opacity="0.15"/>
-                
-                <!-- Legs -->
-                <g class="legs">
-                    <path d="M70 230 L65 285 Q65 295 75 295 L85 295 Q95 295 95 285 L90 230" 
-                        fill="url(#bodyGrad-${type})" stroke="${legsColor}" stroke-width="2"/>
-                    <path d="M110 230 L105 285 Q105 295 115 295 L125 295 Q135 295 135 285 L130 230" 
-                        fill="url(#bodyGrad-${type})" stroke="${legsColor}" stroke-width="2"/>
-                    <circle cx="80" cy="260" r="3" fill="${legsColor}" opacity="0.8"/>
-                    <circle cx="120" cy="260" r="3" fill="${legsColor}" opacity="0.8"/>
-                </g>
-                
-                <!-- Body -->
-                <rect x="55" y="120" width="90" height="115" rx="18" fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.5"/>
-                
-                <!-- Heart/Core -->
-                <g class="heart">
-                    <circle cx="100" cy="175" r="28" fill="#0a0a14" stroke="${heartColor}" stroke-width="2"/>
-                    <circle cx="100" cy="175" r="20" fill="none" stroke="${heartColor}" stroke-width="1" opacity="0.3"/>
-                    <circle cx="100" cy="175" r="12" fill="${heartColor}" opacity="0.6">
-                        ${kpiData.heart >= 100 ? '<animate attributeName="r" values="12;15;12" dur="1s" repeatCount="indefinite"/>' : ''}
-                    </circle>
-                    <circle cx="100" cy="175" r="5" fill="#fff" opacity="0.9"/>
-                </g>
-                
-                <!-- Arms -->
-                <g class="arms">
-                    <path d="M55 130 Q30 135 28 155 L25 200 Q23 215 38 218 L45 218 Q55 215 55 200" 
-                        fill="url(#bodyGrad-${type})" stroke="${handsColor}" stroke-width="2"/>
-                    <circle cx="40" cy="170" r="5" fill="${handsColor}" opacity="0.6"/>
-                    
-                    <path d="M145 130 Q170 135 172 155 L175 200 Q177 215 162 218 L155 218 Q145 215 145 200" 
-                        fill="url(#bodyGrad-${type})" stroke="${handsColor}" stroke-width="2"/>
-                    <circle cx="160" cy="170" r="5" fill="${handsColor}" opacity="0.6"/>
-                </g>
-                
-                <!-- Neck -->
-                <rect x="88" y="100" width="24" height="22" rx="4" fill="#2a2a3a"/>
-                
-                <!-- Head -->
-                <rect x="58" y="25" width="84" height="80" rx="20" fill="url(#bodyGrad-${type})" stroke="${primaryColor}" stroke-width="1" opacity="0.5"/>
-                
-                <!-- Brain -->
-                <g class="brain">
-                    <rect x="70" y="30" width="60" height="18" rx="6" fill="${brainColor}" opacity="0.2" stroke="${brainColor}" stroke-width="1"/>
-                    <path d="M80 39 Q90 33 100 39 Q110 45 120 39" fill="none" stroke="${brainColor}" stroke-width="2" opacity="0.8"/>
-                </g>
-                
-                <!-- Face plate -->
-                <rect x="68" y="52" width="64" height="42" rx="12" fill="#0a0a14"/>
-                
-                <!-- Eyes -->
-                <g class="eyes">
-                    <ellipse cx="85" cy="70" rx="12" ry="10" fill="#050508" stroke="${eyeColor}" stroke-width="2"/>
-                    <circle cx="85" cy="70" r="5" fill="${eyeColor}">
-                        ${kpiData.eye >= 100 ? '<animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/>' : ''}
-                    </circle>
-                    <circle cx="87" cy="68" r="2" fill="#fff"/>
-                    
-                    <ellipse cx="115" cy="70" rx="12" ry="10" fill="#050508" stroke="${eyeColor}" stroke-width="2"/>
-                    <circle cx="115" cy="70" r="5" fill="${eyeColor}">
-                        ${kpiData.eye >= 100 ? '<animate attributeName="r" values="5;7;5" dur="2s" repeatCount="indefinite"/>' : ''}
-                    </circle>
-                    <circle cx="117" cy="68" r="2" fill="#fff"/>
-                </g>
-                
-                <!-- Mouth -->
-                <rect x="85" y="88" width="30" height="5" rx="2" fill="#1a1a2a"/>
-                ${allGood ? `
-                    <rect x="88" y="89" width="3" height="3" rx="1" fill="#00e6a0"/>
-                    <rect x="93" y="89" width="3" height="3" rx="1" fill="#00e6a0"/>
-                    <rect x="98" y="89" width="3" height="3" rx="1" fill="#00e6a0"/>
-                    <rect x="103" y="89" width="3" height="3" rx="1" fill="#00e6a0"/>
-                    <rect x="108" y="89" width="3" height="3" rx="1" fill="#00e6a0"/>
-                ` : ''}
-                
-                <!-- Antenna -->
-                <line x1="100" y1="25" x2="100" y2="10" stroke="#3a3a4a" stroke-width="3"/>
-                <circle cx="100" cy="6" r="5" fill="${allGood ? '#00e6a0' : primaryColor}" filter="url(#glow-${type})">
-                    <animate attributeName="opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
-                </circle>
-                
-                <!-- Gender indicator for MINDY -->
-                ${isMindy ? `
-                    <circle cx="145" cy="35" r="8" fill="none" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                    <line x1="145" y1="43" x2="145" y2="52" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                    <line x1="141" y1="48" x2="149" y2="48" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                ` : `
-                    <circle cx="145" cy="40" r="8" fill="none" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                    <line x1="151" y1="34" x2="158" y2="27" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                    <line x1="153" y1="27" x2="158" y2="27" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                    <line x1="158" y1="27" x2="158" y2="32" stroke="${primaryColor}" stroke-width="2" opacity="0.5"/>
-                `}
-            `;
-        }
 
         async function refreshAnalysis() {
             const content = document.getElementById('analysis-content');
@@ -965,7 +833,12 @@
             }
         }
 
-        async function askForHelp(type, score, kpiData) {
+        async function askForHelp(type) {
+            const data = robotState[type];
+            if (!data) return;
+
+            const { score, kpis } = data;
+
             const modalId = `${type}-help-modal`;
             const contentId = `${type}-help-content`;
 
@@ -986,19 +859,25 @@
                     body: JSON.stringify({
                         department: type,
                         score: score,
-                        kpis: kpiData,
+                        kpis: kpis,
                         rok: dashboardData.rok,
                         tydzien: dashboardData.tydzien
                     })
                 });
 
-                const data = await res.json();
-                document.getElementById(contentId).innerHTML = data.analysis || 'Błąd analizy.';
+                const result = await res.json();
+                document.getElementById(contentId).innerHTML = result.analysis || 'Błąd analizy.';
 
             } catch (err) {
                 document.getElementById(contentId).innerHTML = '<div style="color:#ff6b6b">Nie udało się połączyć z AI.</div>';
             }
         }
+
+        // Store current robot data for help requests
+        const robotState = {
+            mindy: { score: 0, kpis: [] },
+            infron: { score: 0, kpis: [] }
+        };
 
         function renderRobot(type, kpis, currentData, targets, teamCounts) {
             const isMindy = type === 'mindy';
@@ -1012,6 +891,8 @@
 
             // Calculate scores & prepare KPI data for render
             let totalPercent = 0;
+            const safeTeamCounts = teamCounts || { sourcer: 1, rekruter: 1, sdr: 1, bdm: 1 };
+
             const kpiRenderData = kpis.map(kpi => {
                 const baseTarget = getTarget(kpi.key, targets) || kpi.target;
 
@@ -1020,9 +901,9 @@
                 if (kpi.stanowisko !== 'all') {
                     const roleKey = kpi.stanowisko.toLowerCase().includes('rekruter') ? 'rekruter' :
                         kpi.stanowisko.toLowerCase();
-                    multiplier = teamCounts[roleKey] || 1;
+                    multiplier = safeTeamCounts[roleKey] || 1;
                 } else {
-                    multiplier = (teamCounts.sourcer + teamCounts.rekruter) || 1;
+                    multiplier = (safeTeamCounts.sourcer + safeTeamCounts.rekruter) || 1;
                 }
 
                 if (multiplier < 1) multiplier = 1;
@@ -1038,6 +919,9 @@
             const overallScore = Math.round(totalPercent / kpis.length);
             document.getElementById(`${type}-score`).textContent = `${overallScore}%`;
             document.getElementById(`${type}-score`).style.color = getStatusColor(overallScore);
+
+            // Update global state
+            robotState[type] = { score: overallScore, kpis: kpiRenderData };
 
             // Render KPI List
             document.getElementById(`${type}-kpis`).innerHTML = kpiRenderData.map(k => `
@@ -1076,7 +960,7 @@
                 <div class="robot-img-container ${moodClass}">
                     <img src="/images/${robotImg}" alt="Robot ${type}" class="robot-img">
                 </div>
-                <button class="help-btn" onclick='askForHelp("${type}", ${overallScore}, ${JSON.stringify(kpiRenderData).replace(/'/g, "&#39;")})'>
+                <button class="help-btn" onclick="askForHelp('${type}')">
                     🆘 Jak mi pomóc?
                 </button>
                 <div id="${type}-help-modal" class="help-modal" style="display:none;">
