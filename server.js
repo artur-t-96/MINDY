@@ -113,6 +113,17 @@ db.exec(`
         ai_summary TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+
+    CREATE TABLE IF NOT EXISTS uploaded_files (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filename TEXT NOT NULL,
+        path TEXT NOT NULL,
+        size INTEGER,
+        uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        analyzed_at DATETIME,
+        status TEXT DEFAULT 'uploaded'
+    );
 `);
 
 // Insert default targets
@@ -742,9 +753,33 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// Multi-file upload with AI analysis
-app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
+// ============ FILE MANAGEMENT ============
+
+app.get('/admin/files-list', (req, res) => {
+    const files = db.prepare('SELECT * FROM uploaded_files ORDER BY uploaded_at DESC').all();
+    res.json(files);
+});
+
+app.delete('/admin/files/:id', (req, res) => {
+    const id = req.params.id;
+    const file = db.prepare('SELECT path FROM uploaded_files WHERE id = ?').get(id);
+    if (file) {
+        try {
+            if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        } catch (e) {
+            console.error('Error deleting file from disk:', e);
+        }
+        db.prepare('DELETE FROM uploaded_files WHERE id = ?').run(id);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: 'File not found' });
+    }
+});
+
+app.post('/admin/upload', upload.array('files', 10), (req, res) => {
     if (req.body.password !== ADMIN_PASSWORD) {
+        // Cleanup
+        if (req.files) req.files.forEach(f => fs.unlinkSync(f.path));
         return res.status(401).json({ error: 'Nieprawidłowe hasło' });
     }
 
@@ -752,54 +787,76 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
         return res.status(400).json({ error: 'Brak plików' });
     }
 
-    const rok = parseInt(req.body.rok) || new Date().getFullYear();
-    const tydzien = parseInt(req.body.tydzien) || getWeekNumber(new Date());
+    let savedCount = 0;
+    const stmt = db.prepare('INSERT INTO uploaded_files (filename, path, size, status) VALUES (?, ?, ?, ?)');
+
+    req.files.forEach(file => {
+        stmt.run(file.originalname, file.path, file.size, 'uploaded');
+        savedCount++;
+    });
+
+    res.json({ success: true, count: savedCount });
+});
+
+app.post('/admin/analyze-files', async (req, res) => {
+    if (req.body.password !== ADMIN_PASSWORD) {
+        return res.status(401).json({ error: 'Nieprawidłowe hasło' });
+    }
+
+    const { rok, tydzien, fileIds } = req.body;
+    if (!fileIds || fileIds.length === 0) {
+        return res.status(400).json({ error: 'Nie wybrano plików' });
+    }
 
     try {
-        // Read all Excel files
+        // Fetch paths
+        const placeholders = fileIds.map(() => '?').join(',');
+        const files = db.prepare(`SELECT * FROM uploaded_files WHERE id IN (${placeholders})`).all(...fileIds);
+
         const filesData = [];
-        for (const file of req.files) {
-            const data = readExcelFile(file.path);
-            filesData.push({
-                filename: file.originalname,
-                data
-            });
+        for (const file of files) {
+            if (fs.existsSync(file.path)) {
+                const data = readExcelFile(file.path);
+                filesData.push({ filename: file.filename, data });
+            }
         }
 
-        // Analyze with AI
-        const analysisResult = await analyzeExcelWithAI(filesData, rok, tydzien);
+        if (filesData.length === 0) {
+            return res.status(400).json({ error: 'Brak dostępnych plików na dysku' });
+        }
 
+        // Analyze
+        const analysisResult = await analyzeExcelWithAI(filesData, rok, tydzien);
         if (analysisResult.error) {
-            // Cleanup files
-            req.files.forEach(f => fs.unlinkSync(f.path));
             return res.status(400).json({ error: analysisResult.error });
         }
 
-        // Import data
+        // Import
         const importResult = importAnalyzedData(analysisResult, rok, tydzien);
+
+        // Update status
+        const updateStmt = db.prepare('UPDATE uploaded_files SET status = ?, analyzed_at = CURRENT_TIMESTAMP WHERE id = ?');
+        files.forEach(f => updateStmt.run('analyzed', f.id));
 
         // Log import
         db.prepare(`
             INSERT INTO import_log (filename, detected_type, records_imported, ai_summary)
             VALUES (?, ?, ?, ?)
         `).run(
-            req.files.map(f => f.originalname).join(', '),
+            files.map(f => f.filename).join(', '),
             analysisResult.detected_data?.map(d => d.type).join(', ') || 'unknown',
             importResult.imported,
             analysisResult.summary || ''
         );
 
-        // Cleanup files
-        req.files.forEach(f => fs.unlinkSync(f.path));
-
-        // Generate new analysis
+        // Regenerate Dashboard Analysis
         const dashboardAnalysis = await generateDashboardAnalysis(rok, tydzien);
         const tydzienId = getOrCreateTydzien(rok, tydzien);
         db.prepare('INSERT INTO analizy (tydzien_id, tresc) VALUES (?, ?)').run(tydzienId, dashboardAnalysis);
 
         res.json({
             success: true,
-            message: `Zaimportowano ${importResult.imported} rekordów z ${req.files.length} plików`,
+            message: `Przeanalizowano ${files.length} plików, zaimportowano ${importResult.imported} rekordów`,
             summary: analysisResult.summary,
             details: importResult.details,
             warnings: analysisResult.warnings || [],
@@ -807,10 +864,7 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
         });
 
     } catch (err) {
-        console.error('Upload error:', err);
-        req.files.forEach(f => {
-            try { fs.unlinkSync(f.path); } catch (e) { }
-        });
+        console.error('Analysis error:', err);
         res.status(500).json({ error: err.message });
     }
 });

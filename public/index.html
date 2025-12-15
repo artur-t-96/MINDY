@@ -1282,73 +1282,38 @@
                 if (tydzien) params.append('tydzien', tydzien);
 
                 const response = await fetch('/api/dashboard?' + params);
-                dashboardData = await response.json();
+                const data = await response.json();
 
-                // Populate week selector
+                // Populate week selector logic (keep this or move to updateDashboard? better to keep here or ensure updateDashboard handles it)
+                // Let's rely on updateDashboard for rendering, but we need to handle the selector population once or on change.
+                // updateDashboard updates the label, but maybe not the options?
+                // Let's keep selector population here for now or update it.
+
                 const weekSelect = document.getElementById('weekSelect');
-                if (dashboardData.weeks && dashboardData.weeks.length > 0) {
-                    weekSelect.innerHTML = dashboardData.weeks.map(w =>
-                        `<option value="${w.rok}-${w.tydzien}" ${w.rok === dashboardData.rok && w.tydzien === dashboardData.tydzien ? 'selected' : ''}>
-                            Tydzień ${w.tydzien} / ${w.rok}
-                        </option>`
-                    ).join('');
+                if (data.weeks && data.weeks.length > 0) {
+                    // Only update options if empty or needed, to avoid resetting selection focus if meaningful
+                    if (weekSelect.options.length <= 1) {
+                        weekSelect.innerHTML = data.weeks.map(w =>
+                            `<option value="${w.rok}-${w.tydzien}" ${w.rok === data.rok && w.tydzien === data.tydzien ? 'selected' : ''}>
+                                Tydzień ${w.tydzien} / ${w.rok}
+                            </option>`
+                        ).join('');
+                    } else {
+                        // Just update computed selection if needed
+                        weekSelect.value = `${data.rok}-${data.tydzien}`;
+                    }
                 } else {
                     const now = new Date();
                     const currentWeek = getWeekNumber(now);
                     weekSelect.innerHTML = `<option value="${now.getFullYear()}-${currentWeek}">Tydzień ${currentWeek} / ${now.getFullYear()}</option>`;
                 }
 
-                // Calculate totals
-                const rekTotals = calculateTeamTotals(dashboardData.current.rekrutacja, 'rekrutacja');
-                const salesTotals = calculateTeamTotals(dashboardData.current.sprzedaz, 'sprzedaz');
-
-                // Render MINDY
-                const mindyScore = calculateOverallScore(rekTotals, dashboardData.targets, 'rekrutacja');
-                document.getElementById('mindy-score').textContent = mindyScore + '%';
-                document.getElementById('mindy-score').style.color = getStatusColor(mindyScore);
-
-                createRobotSVG('mindy-robot', {
-                    eye: rekTotals.weryfikacje > 0 ? (rekTotals.weryfikacje / 60) * 100 : 50,
-                    brain: rekTotals.rekomendacje > 0 ? (rekTotals.rekomendacje / 45) * 100 : 50,
-                    heart: rekTotals.cv_dodane > 0 ? (rekTotals.cv_dodane / 50) * 100 : 50,
-                    hands: 80,
-                    legs: rekTotals.placements > 0 ? (rekTotals.placements / 3) * 100 : 50
-                }, 'mindy');
-
-                renderKPIList('mindy-kpis', MINDY_KPIS, rekTotals, dashboardData.targets);
-
-                // Render INFRON
-                const infronScore = calculateOverallScore(salesTotals, dashboardData.targets, 'sprzedaz');
-                document.getElementById('infron-score').textContent = infronScore + '%';
-                document.getElementById('infron-score').style.color = getStatusColor(infronScore);
-
-                createRobotSVG('infron-robot', {
-                    eye: salesTotals.leady > 0 ? (salesTotals.leady / 10) * 100 : 50,
-                    brain: 80,
-                    heart: salesTotals.mrr > 0 ? (salesTotals.mrr / 4000) * 100 : 50,
-                    hands: salesTotals.oferty > 0 ? (salesTotals.oferty / 1) * 100 : 50,
-                    legs: 80
-                }, 'infron');
-
-                renderKPIList('infron-kpis', INFRON_KPIS, salesTotals, dashboardData.targets);
-
-                // Render tables
-                renderTable('table-rekrutacja', dashboardData.current.rekrutacja, 'rekrutacja', dashboardData.targets);
-                renderTable('table-sprzedaz', dashboardData.current.sprzedaz, 'sprzedaz', dashboardData.targets);
-                renderHitRatioTable(dashboardData.current.hitRatio);
-
-                // Render averages
-                renderAverages(dashboardData.average);
-
-                // Render analysis
-                if (dashboardData.analysis) {
-                    document.getElementById('analysis-content').innerHTML = formatAnalysis(dashboardData.analysis);
-                } else {
-                    document.getElementById('analysis-content').innerHTML = '<div class="analysis-loading">Kliknij "Odśwież analizę" aby wygenerować AI analizę</div>';
-                }
+                // Call the unified render function
+                updateDashboard(data);
 
             } catch (err) {
                 console.error('Error loading dashboard:', err);
+                document.getElementById('analysis-content').innerHTML = '<div style="color:var(--red);">Błąd pobierania danych</div>';
             }
         }
 
