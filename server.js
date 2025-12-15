@@ -833,11 +833,18 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
     try {
         const filesData = [];
         for (const file of req.files) {
-            filesData.push({ filename: file.originalname, data: readExcelFile(file.path) });
+            const excelData = readExcelFile(file.path);
+            console.log(`File: ${file.originalname}, Sheets: ${Object.keys(excelData).join(', ')}`);
+            Object.keys(excelData).forEach(sheet => {
+                console.log(`  Sheet "${sheet}": ${excelData[sheet].length} rows`);
+            });
+            filesData.push({ filename: file.originalname, data: excelData });
         }
 
         // Use AI to analyze structure (AI rozpozna okresy automatycznie)
+        console.log("Sending to AI for analysis...");
         const analysisResult = await analyzeExcelWithAI(filesData);
+        console.log("AI analysis complete. Summary:", analysisResult.summary || analysisResult.error || 'No summary');
 
         if (analysisResult.error) {
             req.files.forEach(f => fs.unlinkSync(f.path));
@@ -846,6 +853,17 @@ app.post('/admin/upload', upload.array('files', 10), async (req, res) => {
 
         // Import data (każdy rekord ma swój rok/tydzien)
         const importResult = importAnalyzedData(analysisResult);
+
+        console.log("Import result:", JSON.stringify(importResult));
+
+        // Check if any data was imported
+        if (importResult.imported === 0) {
+            req.files.forEach(f => fs.unlinkSync(f.path));
+            return res.status(400).json({
+                error: 'AI nie znalazło danych do importu. Sprawdź czy plik zawiera dane KPI w rozpoznawalnym formacie (imiona, stanowiska, weryfikacje, rekomendacje, CV, placements, leady, oferty, MRR).',
+                aiSummary: analysisResult.summary || 'Brak podsumowania'
+            });
+        }
 
         // Log
         const periodsStr = importResult.periods.map(p => `T${p.tydzien}/${p.rok}`).join(', ');
