@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MINDY & INFRON - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            min-height: 100vh;
+            background: #0a0b10;
+            font-family: 'Outfit', sans-serif;
+            color: #fff;
+            padding: 40px 20px;
+        }
+        
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            text-decoration: none;
+            margin-bottom: 30px;
+        }
+        .back-link:hover { color: #fff; }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #4da6ff, #ff8c42);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle { color: #666; margin-bottom: 30px; }
+        
+        .card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+        
+        .form-group { margin-bottom: 16px; }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 6px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4da6ff;
+        }
+        
+        select option { background: #1a1b20; }
+        
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(255,255,255,0.15);
+            border-radius: 16px;
+            padding: 50px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.01);
+            margin-bottom: 16px;
+        }
+        
+        .drop-zone:hover {
+            border-color: rgba(77, 166, 255, 0.5);
+            background: rgba(77, 166, 255, 0.05);
+        }
+        
+        .drop-zone.dragover {
+            border-color: #4da6ff;
+            background: rgba(77, 166, 255, 0.1);
+        }
+        
+        .drop-zone-icon { font-size: 3rem; margin-bottom: 12px; }
+        .drop-zone-text { font-size: 1.1rem; color: #888; margin-bottom: 6px; }
+        .drop-zone-hint { font-size: 0.8rem; color: #555; }
+        
+        /* File List */
+        .file-list { margin-bottom: 16px; }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .file-icon { font-size: 1.3rem; }
+        .file-info { flex: 1; }
+        .file-name { font-weight: 500; font-size: 0.9rem; }
+        .file-size { font-size: 0.7rem; color: #666; }
+        
+        .file-remove {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        
+        .file-remove:hover { background: rgba(255, 107, 107, 0.1); }
+        
+        /* Buttons */
+        button.primary {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #4da6ff, #00e6a0);
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(77, 166, 255, 0.3);
+        }
+        
+        button.primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff6b6b, #ff8c8c);
+        }
+        
+        button.danger:hover {
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.3);
+        }
+        
+        .btn-note {
+            font-size: 0.75rem;
+            color: #666;
+            text-align: center;
+            margin-top: 8px;
+        }
+        
+        /* Result */
+        .result-card {
+            padding: 16px;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+        }
+        
+        .result-card.success {
+            background: rgba(0, 230, 160, 0.1);
+            border: 1px solid rgba(0, 230, 160, 0.2);
+            color: #00e6a0;
+        }
+        
+        .result-card.error {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+        
+        .result-details {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .loading.active { display: block; }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #4da6ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .loading-text { color: #888; font-size: 0.9rem; }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover { background: rgba(255,255,255,0.08); }
+        
+        .tab.active {
+            background: rgba(77, 166, 255, 0.2);
+            border-color: #4da6ff;
+            color: #4da6ff;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Data Management */
+        .data-week-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .data-week-info { flex: 1; }
+        .data-week-title { font-weight: 500; }
+        .data-week-count { font-size: 0.75rem; color: #666; }
+        
+        .data-week-delete {
+            padding: 8px 16px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            border-radius: 6px;
+            color: #ff6b6b;
+            font-family: inherit;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .data-week-delete:hover {
+            background: rgba(255, 107, 107, 0.2);
+        }
+        
+        /* History */
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .history-date { font-size: 0.75rem; color: #666; width: 100px; }
+        .history-info { flex: 1; }
+        .history-files { font-size: 0.85rem; }
+        .history-count { font-size: 0.75rem; color: #888; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Powrót do Dashboard</a>
+        
+        <h1>🤖 Panel Administracyjny</h1>
+        <p class="subtitle">Upload danych i zarządzanie</p>
+        
+        <!-- Auth -->
+        <div class="card">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🔑 Hasło</label>
+                    <input type="password" id="password" placeholder="Hasło administratora">
+                </div>
+                <div class="form-group">
+                    <label>📅 Tydzień (do usuwania)</label>
+                    <input type="number" id="tydzien" min="1" max="53">
+                </div>
+                <div class="form-group">
+                    <label>📆 Rok (do usuwania)</label>
+                    <input type="number" id="rok" min="2020" max="2030">
+                </div>
+            </div>
+            <div style="font-size: 0.75rem; color: #666; margin-top: -10px;">
+                💡 Przy uploadzie AI automatycznie rozpozna okresy z plików Excel
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="upload">📤 Upload plików</div>
+            <div class="tab" data-tab="manage">🗑️ Zarządzaj danymi</div>
+            <div class="tab" data-tab="history">📜 Historia</div>
+        </div>
+        
+        <!-- Upload Tab -->
+        <div class="tab-content active" id="tab-upload">
+            <div class="card">
+                <div class="card-title">📤 Upload plików Excel</div>
+                
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">📁</div>
+                    <div class="drop-zone-text">Przeciągnij pliki Excel tutaj</div>
+                    <div class="drop-zone-hint">lub kliknij aby wybrać • możesz wgrać kilka naraz</div>
+                    <input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv" style="display:none">
+                </div>
+                
+                <div class="file-list" id="fileList"></div>
+                
+                <button class="primary" id="uploadBtn" disabled>
+                    <span>📤</span> Wgraj i zaimportuj dane
+                </button>
+                <div class="btn-note">⚡ Szybki import bez AI — stały szablon Excel</div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <div class="loading-text">AI analizuje strukturę plików...</div>
+                </div>
+                
+                <div id="uploadResult"></div>
+            </div>
+            
+            <div class="card" style="background: rgba(255,255,255,0.02);">
+                <div class="card-title">📋 Wymagany format Excel</div>
+                <div style="font-size: 0.85rem; color: #888; line-height: 1.7;">
+                    <p><strong>Arkusz "Rekrutacja":</strong></p>
+                    <p style="color:#666; margin-left:16px;">Tydzień | Rok | Imię | Stanowisko | Dni pracy | Weryfikacje | Rekomendacje | CV do bazy | Placements</p>
+                    
+                    <p style="margin-top:12px;"><strong>Arkusz "Sprzedaż":</strong></p>
+                    <p style="color:#666; margin-left:16px;">Tydzień | Rok | Imię | Stanowisko | Dni pracy | Leady | Wysłane oferty | MRR</p>
+                    
+                    <p style="margin-top:12px;"><strong>Arkusz "HitRatio" (opcjonalnie):</strong></p>
+                    <p style="color:#666; margin-left:16px;">Miesiąc | Rok | Delivery Lead | Zamknięte Requesty | Placements</p>
+                    
+                    <p style="margin-top:12px; color: #00e6a0;">
+                        ⚡ Upload nie używa AI — dane są parsowane bezpośrednio ze stałego szablonu
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Manage Tab -->
+        <div class="tab-content" id="tab-manage">
+            <div class="card">
+                <div class="card-title">🗑️ Usuń dane z tygodnia</div>
+                <p style="font-size: 0.85rem; color: #888; margin-bottom: 16px;">
+                    Wybierz tydzień powyżej i kliknij "Usuń dane" aby skasować wszystkie dane z tego tygodnia.
+                </p>
+                
+                <button class="primary danger" onclick="deleteWeekData()">
+                    <span>🗑️</span> Usuń dane z wybranego tygodnia
+                </button>
+                
+                <div id="deleteResult"></div>
+            </div>
+            
+            <div class="card">
+                <div class="card-title">📊 Zapisane tygodnie</div>
+                <div id="savedWeeks">Ładowanie...</div>
+            </div>
+        </div>
+        
+        <!-- History Tab -->
+        <div class="tab-content" id="tab-history">
+            <div class="card">
+                <div class="card-title">📜 Historia importów</div>
+                <div id="history">Ładowanie...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set defaults
+        const now = new Date();
+        document.getElementById('rok').value = now.getFullYear();
+        document.getElementById('tydzien').value = getWeekNumber(now);
+        
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        
+        // Tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // File handling
+        let selectedFiles = [];
+        
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+        
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', () => handleFiles(fileInput.files));
+        
+        function handleFiles(files) {
+            for (const file of files) {
+                if (!selectedFiles.find(f => f.name === file.name)) {
+                    selectedFiles.push(file);
+                }
+            }
+            renderFileList();
+        }
+        
+        function renderFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '';
+                uploadBtn.disabled = true;
+                return;
+            }
+            
+            fileList.innerHTML = selectedFiles.map((file, idx) => `
+                <div class="file-item">
+                    <div class="file-icon">📄</div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatSize(file.size)}</div>
+                    </div>
+                    <button class="file-remove" onclick="removeFile(${idx})">✕</button>
+                </div>
+            `).join('');
+            
+            uploadBtn.disabled = false;
+        }
+        
+        function removeFile(idx) {
+            selectedFiles.splice(idx, 1);
+            renderFileList();
+        }
+        
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // Upload
+        uploadBtn.addEventListener('click', async () => {
+            const password = document.getElementById('password').value;
+            const rok = document.getElementById('rok').value;
+            const tydzien = document.getElementById('tydzien').value;
+            
+            if (!password) return alert('Wprowadź hasło');
+            if (selectedFiles.length === 0) return alert('Wybierz pliki');
+            
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('uploadResult').innerHTML = '';
+            uploadBtn.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('password', password);
+            formData.append('rok', rok);
+            formData.append('tydzien', tydzien);
+            selectedFiles.forEach(file => formData.append('files', file));
+            
+            try {
+                const response = await fetch('/admin/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                document.getElementById('loading').classList.remove('active');
+                
+                if (response.ok) {
+                    let html = `<div class="result-card success">
+                        <strong>✅ ${result.message}</strong>
+                        <div class="result-details">${result.summary || ''}</div>
+                    `;
+                    
+                    if (result.periods && result.periods.length > 0) {
+                        html += '<div class="result-details" style="color: #4da6ff;">📅 Okresy: ' + 
+                            result.periods.map(p => `T${p.tydzien}/${p.rok}`).join(', ') + '</div>';
+                    }
+                    
+                    if (result.details && result.details.length > 0) {
+                        html += '<div class="result-details">';
+                        result.details.forEach(d => {
+                            html += `<div>• ${d.type}: ${d.count} rekordów z ${d.file}</div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    if (result.warnings && result.warnings.length > 0) {
+                        html += '<div class="result-details" style="color: #ffd54f;">⚠️ ' + result.warnings.join('<br>') + '</div>';
+                    }
+                    
+                    html += '</div>';
+                    document.getElementById('uploadResult').innerHTML = html;
+                    
+                    selectedFiles = [];
+                    renderFileList();
+                    loadHistory();
+                    loadSavedWeeks();
+                } else {
+                    document.getElementById('uploadResult').innerHTML = `
+                        <div class="result-card error">❌ ${result.error}</div>
+                    `;
+                }
+                
+            } catch (err) {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('uploadResult').innerHTML = `
+                    <div class="result-card error">❌ Błąd połączenia: ${err.message}</div>
+                `;
+            }
+            
+            uploadBtn.disabled = selectedFiles.length === 0;
+        });
+        
+        // Delete week data
+        async function deleteWeekData() {
+            const password = document.getElementById('password').value;
+            const rok = document.getElementById('rok').value;
+            const tydzien = document.getElementById('tydzien').value;
+            
+            if (!password) return alert('Wprowadź hasło');
+            
+            if (!confirm(`Czy na pewno chcesz usunąć wszystkie dane z tygodnia ${tydzien}/${rok}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/admin/data/${rok}/${tydzien}?password=${encodeURIComponent(password)}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('deleteResult').innerHTML = `
+                        <div class="result-card success">✅ ${result.message}</div>
+                    `;
+                    loadSavedWeeks();
+                } else {
+                    document.getElementById('deleteResult').innerHTML = `
+                        <div class="result-card error">❌ ${result.error}</div>
+                    `;
+                }
+                
+            } catch (err) {
+                document.getElementById('deleteResult').innerHTML = `
+                    <div class="result-card error">❌ Błąd: ${err.message}</div>
+                `;
+            }
+        }
+        
+        // Load saved weeks
+        async function loadSavedWeeks() {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+                
+                if (!data.weeks || data.weeks.length === 0) {
+                    document.getElementById('savedWeeks').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak zapisanych danych</div>';
+                    return;
+                }
+                
+                document.getElementById('savedWeeks').innerHTML = data.weeks.slice(0, 20).map(w => `
+                    <div class="data-week-item">
+                        <div>📅</div>
+                        <div class="data-week-info">
+                            <div class="data-week-title">Tydzień ${w.tydzien} / ${w.rok}</div>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (err) {
+                document.getElementById('savedWeeks').innerHTML = '<div style="color:#ff6b6b;">Błąd ładowania</div>';
+            }
+        }
+        
+        // Load history
+        async function loadHistory() {
+            try {
+                const response = await fetch('/admin/history');
+                const history = await response.json();
+                
+                if (history.length === 0) {
+                    document.getElementById('history').innerHTML = '<div style="color:#666;text-align:center;padding:20px;">Brak importów</div>';
+                    return;
+                }
+                
+                document.getElementById('history').innerHTML = history.slice(0, 20).map(h => {
+                    const date = new Date(h.created_at);
+                    return `
+                        <div class="history-item">
+                            <div class="history-date">${date.toLocaleDateString('pl-PL')}<br>${date.toLocaleTimeString('pl-PL', {hour:'2-digit', minute:'2-digit'})}</div>
+                            <div class="history-info">
+                                <div class="history-files">${h.filename || 'Brak nazwy'}</div>
+                                <div class="history-count">Tyg. ${h.tydzien}/${h.rok} • ${h.records_imported} rekordów • ${h.detected_type || ''}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (err) {
+                document.getElementById('history').innerHTML = '<div style="color:#ff6b6b;">Błąd ładowania</div>';
+            }
+        }
+        
+        loadHistory();
+        loadSavedWeeks();
+    </script>
+</body>
+</html>
