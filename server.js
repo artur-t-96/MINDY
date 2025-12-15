@@ -4,6 +4,7 @@ const XLSX = require('xlsx');
 const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
+const { jsonrepair } = require('jsonrepair');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -184,13 +185,26 @@ function readExcelFile(filePath) {
 
 function excelDataToText(excelData, filename) {
     let text = `PLIK: ${filename}\n\n`;
+    const MAX_ROWS_PER_SHEET = 50;  // Increased to capture more data
+    const MAX_COLS = 15;  // Limit columns to prevent overly wide rows
+
     Object.keys(excelData).forEach(sheetName => {
         text += `=== ARKUSZ: ${sheetName} ===\n`;
         const rows = excelData[sheetName];
-        rows.slice(0, 30).forEach((row, idx) => {
-            text += `Wiersz ${idx + 1}: ${row.map(c => String(c || '')).join(' | ')}\n`;
+
+        // Take first rows up to limit
+        rows.slice(0, MAX_ROWS_PER_SHEET).forEach((row, idx) => {
+            // Limit columns and trim long cell values
+            const limitedRow = row.slice(0, MAX_COLS).map(c => {
+                const str = String(c || '');
+                return str.length > 50 ? str.substring(0, 50) + '...' : str;
+            });
+            text += `R${idx + 1}: ${limitedRow.join(' | ')}\n`;
         });
-        if (rows.length > 30) text += `... (${rows.length - 30} więcej wierszy)\n`;
+
+        if (rows.length > MAX_ROWS_PER_SHEET) {
+            text += `... (${rows.length - MAX_ROWS_PER_SHEET} więcej wierszy)\n`;
+        }
         text += '\n';
     });
     return text;
@@ -390,7 +404,10 @@ WAŻNE:
 - Jeśli nie ma kolumny z datą/tygodniem, użyj bieżącego tygodnia: ${getWeekNumber(new Date())}/${new Date().getFullYear()}
 - Jeśli jest data (np. 2024-12-10), oblicz tydzień z tej daty
 - Jeśli jest "Tydzień 50" lub "W50" - użyj tego
-- Każdy rekord MUSI mieć rok i tydzien`;
+- Każdy rekord MUSI mieć rok i tydzien
+- W rekordach uwzględniaj TYLKO pola które mają wartości > 0 (pomiń zerowe wartości)
+- Odpowiedź musi być kompletnym, poprawnym JSON - upewnij się że wszystkie nawiasy są zamknięte
+- Jeśli danych jest dużo, skup się na najważniejszych (pierwsze 50 rekordów)`;
 
     try {
         const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -402,7 +419,7 @@ WAŻNE:
             },
             body: JSON.stringify({
                 model: 'claude-3-haiku-20240307', // Switched to Haiku for best availability
-                max_tokens: 4096,
+                max_tokens: 8192,  // Increased from 4096 to handle larger Excel files
                 messages: [{ role: 'user', content: prompt }]
             })
         });
@@ -423,28 +440,37 @@ WAŻNE:
                 try {
                     return JSON.parse(jsonText);
                 } catch (parseErr) {
-                    console.log("JSON Parse Error. Attempting repair...");
-                    // Simple repair: try to find the last valid closing sequence or just append closing braces
-                    // This is a naive heuristic but often helps with truncated arrays
+                    console.log("JSON Parse Error. Attempting repair with jsonrepair...");
 
-                    // 1. Try to cut off at the last closing brace of an object or array in case there is garbage at the end
-                    const lastBrace = jsonText.lastIndexOf('}');
-                    const lastBracket = jsonText.lastIndexOf(']');
-                    const lastValidChar = Math.max(lastBrace, lastBracket);
+                    // Use jsonrepair library for robust JSON repair
+                    try {
+                        const repairedJson = jsonrepair(jsonText);
+                        console.log("JSON successfully repaired");
+                        return JSON.parse(repairedJson);
+                    } catch (repairErr) {
+                        console.log("jsonrepair failed, trying manual repair...");
 
-                    if (lastValidChar !== -1) {
-                        try {
-                            return JSON.parse(jsonText.substring(0, lastValidChar + 1));
-                        } catch (e) { /* ignore */ }
+                        // Fallback: Try to cut off at the last valid closing sequence
+                        const lastBrace = jsonText.lastIndexOf('}');
+                        const lastBracket = jsonText.lastIndexOf(']');
+                        const lastValidChar = Math.max(lastBrace, lastBracket);
+
+                        if (lastValidChar !== -1) {
+                            try {
+                                const truncated = jsonText.substring(0, lastValidChar + 1);
+                                const repairedTruncated = jsonrepair(truncated);
+                                return JSON.parse(repairedTruncated);
+                            } catch (e) { /* ignore */ }
+                        }
+
+                        console.error("All JSON repair attempts failed. Original text length:", jsonText.length);
+                        console.error("Parse error:", parseErr.message);
+
+                        return {
+                            error: 'Otrzymano niepełne dane od AI (JSON Error). Spróbuj wgrać mniej plików naraz lub plik z mniejszą ilością danych.',
+                            details: parseErr.message
+                        };
                     }
-
-                    // 2. If it looks like a cut-off array inside the object
-                    // We can't easily auto-repair complex nested truncated JSON without a library like 'json-repair'
-                    // but we can log it to help debugging
-                    console.error("Failed JSON text:", jsonText);
-
-                    // Return what we can or error
-                    return { error: 'Otrzymano niepełne dane od AI (JSON Error). Spróbuj wgrać mniej plików naraz.', details: parseErr.message };
                 }
             }
         }
